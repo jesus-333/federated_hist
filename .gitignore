@@ -8,6 +8,9 @@
 *.pkl
 *.pyc
 *.srl
+*.svg
+*.png
 flower_app/certificates
 flower_app/results
 results
+Tutorial and Notes/flare_examples_backup/
