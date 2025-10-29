@@ -1,6 +1,6 @@
 """
 A Flower `ServerApp` that train a machine learning algorithm.
-Currently implemented algorithm are LDA, SVM, neural network, k-means.
+Currently implemented algorithm SVM, LASSO
 
 @author: Alberto Zancanaro (Jesus)
 @organization: Luxembourg Centre for Systems Biomedicine (LCSB)
@@ -242,7 +242,7 @@ def get_model_weights_from_clients(grid: Grid, node_ids : list[int], my_config :
 
         # Get the model weights
         tmp_params = []
-        if my_config['ml_model_name'] == 'SVM' :
+        if my_config['ml_model_name'] == 'SVM' or my_config['ml_model_name'] == 'LASSO' :
             # Get the coefficients
             # Note that for SVM the params are [coef, intercept], coef is of shape (n_classes, n_features)
             tmp_coef = []

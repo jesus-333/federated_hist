@@ -1,6 +1,6 @@
 """
 A Flower `ClientApp` that train a machine learning algorithm
-Currently implemented algorithm are LDA, SVM, neural network, k-means.
+Currently implemented algorithm are SVM
 
 @author: Alberto Zancanaro (Jesus)
 @organization: Luxembourg Centre for Systems Biomedicine (LCSB)
@@ -68,7 +68,9 @@ def train(msg: Message, context: Context):
     model_record = ArrayRecord(params_trained)
 
     # Prepare metrics
-    metrics = support_ml_app.compute_metrics(y_train, ml_model.predict(x_train))
+    if ml_model_name == 'LASSO' : regression = True
+    else : regression = False
+    metrics = support_ml_app.compute_metrics(y_train, ml_model.predict(x_train), regression = regression)
     metrics['num-examples'] = len(x_train)
     metric_record = MetricRecord(metrics)
 
@@ -101,7 +103,7 @@ def query(msg : Message, context : Context) :
     with open(f"{path_to_save_model}/trained_params_{ml_model_name}_node_{node_id}.pkl", "rb") as f : params = pickle.load(f)
     
     model_weights = dict()
-    if my_config['ml_model_name'] == 'SVM' :
+    if my_config['ml_model_name'] == 'SVM' or my_config['ml_model_name'] == 'LASSO' :
         # For SVM the params are [coef, intercept], coef is of shape (n_classes, n_features)
         
         for i in range(len(params[0])) :
