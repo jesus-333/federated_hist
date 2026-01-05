@@ -12,22 +12,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """
-This code shows how to use NVIDIA FLARE Job Recipe to connect both Federated learning client and server algorithm
+This code show to use NVIDIA FLARE Job Recipe to connect both Federated learning client and server algorithm
 and run it under different environments
 """
 import argparse
 
-from model import SimpleNumpyModel
+from model import SimpleNetwork
 
-from nvflare.app_common.np.recipes.fedavg import NumpyFedAvgRecipe
+from nvflare.app_opt.pt.recipes.fedavg import FedAvgRecipe
 from nvflare.recipe import SimEnv, add_experiment_tracking
 
 
 def define_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument("--n_clients", type=int, default=2)
-    parser.add_argument("--num_rounds", type=int, default=3)
-    parser.add_argument("--learning_rate", type=float, default=1.0)
+    parser.add_argument("--num_rounds", type=int, default=2)
 
     return parser.parse_args()
 
@@ -37,23 +36,21 @@ def main():
 
     n_clients = args.n_clients
     num_rounds = args.num_rounds
-    learning_rate = args.learning_rate
 
-    recipe = NumpyFedAvgRecipe(
-        name="hello-numpy",
-        min_clients=n_clients,
-        num_rounds=num_rounds,
-        initial_model=SimpleNumpyModel(),
-        train_script="client.py",
-        train_args=f"--learning_rate {learning_rate}",
+    recipe = FedAvgRecipe(
+        name = "hello-pt",
+        min_clients = n_clients,
+        num_rounds = num_rounds,
+        initial_model = SimpleNetwork(),
+        train_script = "client.py",
     )
-    add_experiment_tracking(recipe, tracking_type="tensorboard")
+    add_experiment_tracking(recipe, tracking_type = "tensorboard")
 
-    env = SimEnv(num_clients = n_clients)
+    env = SimEnv(num_clients=n_clients)
     run = recipe.execute(env)
     print()
-    print("Result can be found in :", run.get_result())
     print("Job Status is:", run.get_status())
+    print("Result can be found in :", run.get_result())
     print()
 
 
