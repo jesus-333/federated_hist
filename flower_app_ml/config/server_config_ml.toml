@@ -1,0 +1,18 @@
+n_nodes = 2
+num_rounds = 2
+max_number_of_attempts = 3
+path_to_save = "./results"
+path_server_data = "../../data/server_data_D1.csv"
+path_file_with_fields_to_use_for_the_train = "../../config/fields_ml.txt"
+# ml_model_name = "SVM"
+ml_model_name = "LASSO"
+[ml_algorithm_config]
+alpha=1
+penalty = "l2"
+loss = "squared_hinge"
+dual = 'auto'
+tol = 1e-4
+C = 1.0
+multi_class = "ovr"
+max_iter = 1000
+

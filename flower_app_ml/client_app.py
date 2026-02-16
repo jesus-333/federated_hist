@@ -31,9 +31,18 @@ def train(msg: Message, context: Context):
     Train the model on local data.
     """
 
+    print("########################################################")
+    import pathlib
+    print(pathlib.Path().resolve(), "AAAAAAAAAAAAAAAAA\n")
+    print(context)
+    print("AAAAAAAAAAAAAAAAA")
+
     # Get node config
-    path_client_data = context.node_config["path_client_data"]
-    node_id = context.node_config['node_id']
+    # path_client_data = context.node_config["path_client_data"]
+    # node_id = context.node_config['node_id']
+    # TODO REMOVE
+    node_id = context.node_config['partition-id']
+    path_client_data = f'../../../../data/client_{node_id}_data_D1.csv'
 
     # Get ml model config
     ml_model_config = msg.content["config"]
@@ -82,6 +91,9 @@ def train(msg: Message, context: Context):
     os.makedirs(path_to_save_model, exist_ok = True)
     with open(f'{path_to_save_model}trained_params_{ml_model_name}_node_{node_id}.pkl', "wb") as f : pickle.dump(params, f)
 
+    print(params_trained, "\n", metric_record)
+    print("########################################################")
+
     return Message(content = content, reply_to = msg)
 
 @app.query()
@@ -94,7 +106,7 @@ def query(msg : Message, context : Context) :
     """
     
     # Get config
-    node_id = context.node_config['node_id']
+    node_id = context.node_config['partition-id']
     path_to_save_model = context.node_config['path_to_save_model'] if 'path_to_save_model' in context.node_config else './'
     my_config = msg.content['my_config']
 
@@ -103,12 +115,14 @@ def query(msg : Message, context : Context) :
     with open(f"{path_to_save_model}/trained_params_{ml_model_name}_node_{node_id}.pkl", "rb") as f : params = pickle.load(f)
     
     model_weights = dict()
-    if my_config['ml_model_name'] == 'SVM' or my_config['ml_model_name'] == 'LASSO' :
+    if my_config['ml_model_name'] == 'SVM' :
         # For SVM the params are [coef, intercept], coef is of shape (n_classes, n_features)
-        
         for i in range(len(params[0])) :
             model_weights[f'coef_class_{i}'] = list(params[0][i])
 
+        model_weights['intercept'] = list(params[1])
+    elif my_config['ml_model_name'] == 'LASSO' :
+        model_weights['coef'] = list(params[0])
         model_weights['intercept'] = list(params[1])
 
     # Prepare the Message to send the model weights to the server
@@ -117,6 +131,24 @@ def query(msg : Message, context : Context) :
     # reply_content = RecordDict({"query_results": MetricRecord(query_results)})
 
     return Message(content = reply_content, reply_to = msg)
+
+@app.evaluate()
+def evaluate(message: Message, context: Context) -> Message :
+    """
+    At the moment the evaluate function is not used.
+    It is implemented as a placeholder that simply echoes back fixed metrics to avoid errors.
+    """
+
+    # Construct and return reply Message
+    metrics = {
+        "mse": 1.0,
+        "mae": 1.0,
+        "num-examples": 42,
+    }
+    metric_record = MetricRecord(metrics)
+    content = RecordDict({"metrics": metric_record})
+
+    return Message(content, reply_to = message)
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 

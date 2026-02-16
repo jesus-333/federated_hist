@@ -34,8 +34,13 @@ app = ServerApp()
 @app.main()
 def main(grid: Grid, context: Context) -> None:
     """
-    This `ServerApp` construct a histogram from partial-histograms reported by the `ClientApp`.
+    This `ServerApp` train a ML model through FedAvg.
     """
+
+    import pathlib
+    print("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
+    print(pathlib.Path().resolve())
+    print("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
 
     path_server_config = context.run_config['path_server_config']
     server_config = toml.load(path_server_config)
@@ -81,6 +86,7 @@ def main(grid: Grid, context: Context) -> None:
     support_ml_app.set_model_params(my_config['ml_model_name'], ml_model, params_final)
 
     # Save the final weights of the model
+    os.makedirs(path_to_save, exist_ok = True)
     with open(f'{path_to_save}/final_params_{my_config["ml_model_name"]}.pkl', "wb") as f : pickle.dump(params_final, f)
 
     # Get the model weights of the single node
@@ -88,7 +94,7 @@ def main(grid: Grid, context: Context) -> None:
     node_ids = get_node_ids(grid, n_nodes)
     list_params_per_node = get_model_weights_from_clients(grid, node_ids, my_config)
     
-    # Save the model weights of the single node
+    # Save the model weights of the single nodes
     for i in range(n_nodes) :
         with open(f'{path_to_save}/trained_params_{my_config["ml_model_name"]}_node_{node_ids[i]}.pkl', "wb") as f :
             pickle.dump(list_params_per_node[i], f)
@@ -242,7 +248,7 @@ def get_model_weights_from_clients(grid: Grid, node_ids : list[int], my_config :
 
         # Get the model weights
         tmp_params = []
-        if my_config['ml_model_name'] == 'SVM' or my_config['ml_model_name'] == 'LASSO' :
+        if my_config['ml_model_name'] == 'SVM' :
             # Get the coefficients
             # Note that for SVM the params are [coef, intercept], coef is of shape (n_classes, n_features)
             tmp_coef = []
@@ -251,6 +257,9 @@ def get_model_weights_from_clients(grid: Grid, node_ids : list[int], my_config :
             tmp_params.append(np.array(tmp_coef))
 
             # Get the intercept
+            tmp_params.append(query_results['intercept'])
+        elif my_config['ml_model_name'] == 'LASSO' :
+            tmp_params.append(query_results['coef'])
             tmp_params.append(query_results['intercept'])
 
         list_params_per_node.append(tmp_params)
