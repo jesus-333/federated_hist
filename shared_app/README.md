@@ -42,6 +42,12 @@ Useful links :
 - Flower CLI commands [Documentation](https://flower.ai/docs/framework/ref-api-cli.html)
 
 ## How to run app as nvflare simulation?
+I created a python script called [`nvflare_job.py`](./nvflare_job.py) that works similarly to the `flwr run` command. You could execute the python script with the command `python nvflare_job.py --job_name "flwr-job" --flower_app_dir "path/to/flower/app" --workdir "path/to/workdir"` where
+- `--job_name`, name of the job in Flare.
+- `--flower_app_dir`, path to the flower app (basically the folder where the `pyproject.toml` file is located)
+- `--workdir`, the folder where the nvflare simulation will be executed. If not specified by default will be `./nvflare_sim`
+
+So for example to run the `flower_app_hist_V1` from this folder you have to run the command `python nvflare_job.py --job_name "flwr-ml" --flower_app_dir "./flower_app_hist_V1/"`.
 
 ## How to export app as nvflare job?
 
