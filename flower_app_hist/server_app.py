@@ -1,6 +1,10 @@
 """
 A Flower `ServerApp` that constructs a histogram from clients data.
 
+The computation is performed in two rounds :
+- Round 0 : the server sends a message to the clients, asking them to compute the local min and max of the variable of interest. The server then computes the global min and max, which will be used to create the bins for the histogram (Note that this round can be skipped if the min and max are predefined in the server config file).
+- Round 1 : the server sends a message to the clients, asking them to compute the local histogram of the variable of interest, using the bins computed in round 0. The server then sums the local histograms to obtain the final histogram.
+
 @author: Alberto Zancanaro (Jesus)
 @organization: Luxembourg Centre for Systems Biomedicine (LCSB)
 @contact : alberto.zancanaro@uni.lu
@@ -37,16 +41,36 @@ def main(grid: Grid, context: Context) -> None:
     path_server_config = context.run_config['path_server_config'] if 'path_server_config' in context.run_config else './server_config.toml'
     server_config = toml.load(path_server_config)
 
-    # General settings
+    # Federation settings
+    # min_nodes specify the minimum number of nodes required to start the histogram computation. If not specified, it is set to n_nodes (the total number of nodes connected to the grid).
+    # max_number_of_attempts specify the maximum number of attempts to send the messages and receive the results from the clients. If not specified, it is set to 10. If this number is reached, an exception is raised.
     min_nodes              = server_config['min_nodes'] if 'min_nodes' in server_config else server_config['n_nodes']
     max_number_of_attempts = server_config['max_number_of_attempts'] if 'max_number_of_attempts' in server_config else 10
     
-    # Variable used to create the hist bins
+    # Histrogram settings
+    # This app will create an histrogram with n_bins, distributed between min and max. 
+    # bins_variable specify the name, inside the dataset, of the variable for which the histogram will be created. It is used by the clients to create the local histograms and by the server to create the bins.
+    # bins_distribution specify how the bins are distributed between min and max. It can be either 'uniform' or 'logarithmic'. In the first case the bins are uniformly distributed, in the second case they are logarithmically distributed.
     max, min = None, None
     n_bins = server_config['n_bins'] if 'n_bins' in server_config else 10
+    bins_variable = server_config['bins_variable'] if 'bins_variable' in server_config else None
+    bins_distribution = server_config['bins_distribution'] if 'bins_distribution' in server_config else 'uniform'
+
+    # Check settings
+    if min_nodes <= 0 :
+        raise ValueError(f"Invalid value for min_nodes: {min_nodes}. It must be a positive integer")
+    if max_number_of_attempts <= 0 :
+        raise ValueError(f"Invalid value for max_number_of_attempts: {max_number_of_attempts}. It must be a positive integer")
+    if n_bins <= 0 :
+        raise ValueError(f"Invalid value for n_bins: {n_bins}. It must be a positive integer")
+    if bins_variable is None :
+        raise ValueError("bins_variable must be specified in the server config file")
+    if bins_distribution not in ['uniform', 'logarithmic'] :
+        raise ValueError(f"Invalid value for bins_distribution: {bins_distribution}. It must be either 'uniform' or 'logarithmic'")
     
     # Predefined min and max could be used. By default they are None
     # If both are provided the round 0 for min-max computation will be skipped, otherwise the missing value will be computed
+    # If only one of the two values is provided, the round 0 will be performed to compute the missing value. This allows to use a predefined min and compute the max from the data, or vice versa.
     predefined_min = server_config['predefined_min'] if 'predefined_min' in server_config else None
     predefined_max = server_config['predefined_max'] if 'predefined_max' in server_config else None
     
@@ -56,15 +80,14 @@ def main(grid: Grid, context: Context) -> None:
     # Dictionary used to communicate with the clients
     my_config = dict(
         server_round = -1,
-        bins_variable = server_config['bins_variable'],
-        bins_distribution = server_config['bins_distribution'] if 'bins_distribution' in server_config else 'uniform'
+        bins_variable = bins_variable,
+        bins_distribution = bins_distribution
     )
 
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     # Min and max computation round (round 0)
 
     if predefined_min is None or predefined_max is None :
-
         log(INFO, "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
         log(INFO, "START ROUND for min and max computation (round 0)")
 
@@ -82,10 +105,12 @@ def main(grid: Grid, context: Context) -> None:
         min, max = compute_min_max_federation(results_round_zero)
         
         # Overwrite min or max if predefined values are provided
+        # Note that only one of this two if could be executed.
         if predefined_min is not None : min = predefined_min
         if predefined_max is not None : max = predefined_max
 
     else :
+        # If both predefined_min and predefined_max are provided, skip the round 0 and use the predefined values
         min, max = predefined_min, predefined_max
 
     log(INFO, f"Computed global min: {min}" if predefined_min is None else f"Using predefined min: {min}")
@@ -102,14 +127,14 @@ def main(grid: Grid, context: Context) -> None:
     if my_config['bins_distribution'] == 'uniform' :
         bins = np.linspace(min, max, n_bins + 1)
     elif my_config['bins_distribution'] == 'logarithmic' :
-        if min == 0 : 
+        if min == 0 :
             # Avoid issues with log scale if min is 0
             min = 1e-10
             bins = np.geomspace(min, max, n_bins + 1)
         elif min < 0 and max > 0 :
             # Avoid issues with log scale if min is negative and max is positive
             # TODO Eventually implement a solution for this case
-            # Not necessary fot the PoC since the min value in all dataset, in the worst case, is 0
+            # Not necessary for the PoC since the min value in the dataset is 0
             pass
         else :
             bins = np.geomspace(min, max, n_bins + 1)
@@ -137,7 +162,8 @@ def main(grid: Grid, context: Context) -> None:
 def get_node_ids(grid: Grid, min_nodes: int) -> list[int]:
     """
     Loop and wait until enough nodes are available.
-    
+    N.b. this is not a predefined flower function, but a custom function implemented for this app.
+
     Parameters
     ----------
     grid : Grid
@@ -172,7 +198,8 @@ def get_node_ids(grid: Grid, min_nodes: int) -> list[int]:
 
 def send_and_receive_data(grid: Grid, node_ids: list[int], server_round: int, my_config : dict = None) :
     """
-    Send messages to the specified node ids and wait for all results.
+    Send messages to the specified node ids and wait for all results using the Flower Message API.
+    N.b. this is not a predefined flower function, but a custom function implemented for this app.
 
     Parameters
     ----------
@@ -236,6 +263,8 @@ def get_data_from_clients(grid: Grid, node_ids : list[int], my_config : dict = N
     """
     Use the function `send_and_receive_data` to send messages to the clients and receive their results.
     If an error occurs, the function will retry until the maximum number of attempts is reached.
+    Note that the function is "generic", in the sense that it can be used to send and receive any kind of data from the clients, granted that the data are in a format suitable for Flower messages.
+    N.b. this is not a predefined flower function, but a custom function implemented for this app.
 
     Parameters
     grid : Grid
@@ -388,7 +417,9 @@ def compute_hist(n_bins : int, results_round_one: Iterable[Message]) -> tuple[di
 
 def save_results(label : str, info_to_save : dict, final_hist : np.ndarray, samples_mean : float, samples_std : float, path_to_save : str) -> None :
     """
-    
+    Saves the final histogram, the bins used to compute the histogram and other info in a specified folder.
+    The info is saved in two formats: as a pickle file and as a toml file.
+    The histogram and bins are also saved as numpy arrays.
     """
 
     if ":" in info_to_save['bins_variable'] :
