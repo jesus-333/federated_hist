@@ -11,7 +11,8 @@ Copied and (slightly) modified from the script `job.py` at https://github.com/NV
 
 from argparse import ArgumentParser
 
-from nvflare.app_opt.flower.flower_job import FlowerJob
+from nvflare.app_opt.flower.recipe import FlowerRecipe
+from nvflare.recipe import SimEnv
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -25,20 +26,22 @@ def main():
     parser.add_argument("--num_of_clients", type = int, default = 2)
     args = parser.parse_args()
 
-    job = FlowerJob(
+    recipe = FlowerRecipe(
         name = args.job_name,
         flower_content = args.flower_app_dir,
         min_clients = args.num_of_clients,
     )
 
     if args.export_job:
-        job.export_job(args.export_dir)
+        recipe.export(args.export_dir)
         print(f"Job exported to {args.export_dir}")
     else:
-        job.simulator_run(
-            workspace = args.workdir,
-            n_clients= args.num_of_clients
-        )
+        env = SimEnv(num_clients = args.num_of_clients, workspace_root = args.workdir)
+        run = recipe.execute(env)
+        print("Result can be found in :", run.get_result())
+        print("Job Status is:", run.get_status())
+        print()
+
 
 if __name__ == "__main__":
     main()
