@@ -1,5 +1,10 @@
 Copy of the flower apps already developed to be shared.
 
+
+# List of current app
+- `flower_app_hist`. Compute histogram in a federated environment
+- `flower_app_ml`. Train a linear classifier
+
 # Versions list
 Currently available
 - V1. Work with synthetic data and synthetic config (both hardcoded inside the scripts)
