@@ -1,0 +1,55 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "Clinnova_Federated_Hist_PoC"
+version = "1.0.0"
+description = "Proof of Concept (PoC) for a computation of histograms in a federated environment"
+license = "Apache-2.0"
+authors = [
+    { name = "Alberto Zancanaro", email = "alberto.zancanaro@uni.lu" },
+]
+dependencies = [
+    "flwr[simulation]>=1.22.0",
+    "flwr-datasets[vision]>=0.5.0",
+    "numpy>=2.0.2",
+    "pandas==2.2.3",
+	"matplotlib"
+]
+[tool.hatch.build.targets.wheel]
+packages = ["."]
+
+[tool.flwr.app]
+publisher = "Biocore"
+
+[tool.flwr.app.components]
+serverapp = "server_app:app"
+clientapp = "client_app:app"
+
+[tool.flwr.app.config]
+# This are the config that appears in the run_config object inside the python scripts
+path_server_config = ""
+
+[tool.flwr.federations]
+# Name of the federation where you want to run your app
+default = "local-deployment"
+
+[tool.flwr.federations.local-simulation]
+# Setting specific for a federation (in this case the local-simulation federation)
+# Since it is a simulation I do not need to specify the address of the server but only the available hardware
+options.num-supernodes = 2
+options.backend.client-resources.num-gpus = 1
+options.backend.client-resources.num-cpus = 1
+options.backend.init_args.num_cpus = 1
+options.backend.init_args.num_gpus = 1
+
+[tool.flwr.federations.local-deployment]
+# Setting for another federation. 
+# In this case, since it is a local deployment, i.e. I created the superlink and supernode inside my local machine
+# In fact the address of the server is the local address and I do not need to specify any resource since I am using the resources of my local machine
+# The insecure flag is set to true since I am running with an insecure connection, without TLS. If I want to run with TLS I need to set this flag to false and specify the path to the root certificate of the CA that signed the certificate of the server
+address = "127.0.0.1:9093"
+insecure = true # To run with insecure connection
+# root-certificates = "certificates/ca.crt" # To run with TLS (secure) connection
+
