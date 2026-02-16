@@ -1,6 +1,6 @@
-[build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+# NON FLOWER SETTINGS
+
 
 [project]
 name = "Clinnova_Federated_Hist_PoC"
@@ -17,22 +17,30 @@ dependencies = [
     "pandas==2.2.3",
 	"matplotlib"
 ]
-[tool.hatch.build.targets.wheel]
-packages = ["."]
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+# FLOWER SETTINGS
 
 [tool.flwr.app]
 publisher = "Biocore"
 
 [tool.flwr.app.components]
+# Name of the server and client app. It should be in the format "module_name:app_object_name". 
+# The module name is the name of the python file where the app object is defined (without the .py extension). The path to the file should be relative to the root of the project.
+# The app object name is the name of the variable that contains the app object in the python file.
 serverapp = "server_app:app"
 clientapp = "client_app:app"
+
+# P.s. Note that (theoretically) you don't have to use two files to define ClientApp and ServerApp. You could use the same file and create two variable with different names inside it.
+# But usually it is preferable to keep things separate for greater cleanliness and clarity.
 
 [tool.flwr.app.config]
 # This are the config that appears in the run_config object inside the python scripts
 path_server_config = ""
 
 [tool.flwr.federations]
-# Name of the federation where you want to run your app
+# Federation to use by default to run your app if no federation is specified with the flwr run command
+# It should be also the federation selected when you simulate the app with nvflare
 default = "local-deployment"
 
 [tool.flwr.federations.local-simulation]

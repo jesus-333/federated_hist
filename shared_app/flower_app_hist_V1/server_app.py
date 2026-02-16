@@ -31,8 +31,11 @@ from flwr.server import Grid, ServerApp
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Flower ServerApp
 
+# Create a Flower ServerApp instance. Note that the istance is called `app`, the same name used in the pyproject.toml file
+# The app istance allow us to use the decorator provided by the Flower framework.
 app = ServerApp()
 
+# The main() decorator specify the main function of the ServerApp, which is the function that will be executed when the server app is run.
 @app.main()
 def main(grid: Grid, context: Context) -> None:
     """

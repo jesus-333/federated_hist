@@ -16,12 +16,13 @@ from flwr.client import ClientApp
 from flwr.common import Context, Message, MetricRecord, RecordDict
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# import warnings
-# warnings.filterwarnings("ignore", category = UserWarning)
 
-# Flower ClientApp
+# Create a Flower ClientApp instance. Note that the istance is called `app`, the same name used in the pyproject.toml file
+# The app istance allow us to use the decorator provided by the Flower framework.
 app = ClientApp()
 
+# The query() decorator allow us to define a function that will be called when the client receive a message of type "query" from the server. 
+# The function always receive two arguments: the message received from the server and the context of the client. The function should return a message that will be sent back to the server as a reply to the query.
 @app.query()
 def query(msg : Message, context : Context):
     """
