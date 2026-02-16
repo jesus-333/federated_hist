@@ -43,14 +43,21 @@ Useful links :
 
 ## How to run app with nvflare simulation?
 I created two python scripts called [`nvflare_job.py`](./nvflare_job.py) and [`nvflare_recipe.py`](./nvflare_recipe.py) that works similarly to the `flwr run` command. 
-You could execute the python script with the command `python nvflare_job.py --job_name "flwr-job" --flower_app_dir "path/to/flower/app" --workdir "path/to/workdir"` where
+You could execute the python script with the command 
+```shell
+python nvflare_job.py --job_name "flwr-job" --flower_app_dir "path/to/flower/app" --workdir "path/to/workdir"
+``` 
+where
 - `--job_name`, name of the job in Flare.
 - `--flower_app_dir`, path to the flower app (basically the folder where the `pyproject.toml` file is located)
 - `--workdir`, the folder where the nvflare simulation will be executed. If not specified by default will be `./nvflare_sim`
 The only difference between the two script is that [`nvflare_job.py`](./nvflare_job.py) use the [`FlowerJob`](https://github.com/NVIDIA/NVFlare/blob/main/nvflare/app_opt/flower/flower_job.py) and [nvflare_recipe.py](./nvflare_recipe.py) use [`FlowerRecipe`](https://github.com/NVIDIA/NVFlare/blob/main/nvflare/app_opt/flower/recipe.py).
 The `FlowerRecipe` is [recipe](https://nvflare.readthedocs.io/en/main/user_guide/data_scientist_guide/job_recipe.html) of the `FlowerJob` (basically a wrapper of the `FlowerJob`).
 
-So for example to run the `flower_app_hist_V1` from this folder you have to run the command `python nvflare_job.py --job_name "flwr-ml" --flower_app_dir "./flower_app_hist_V1/"`.
+So for example to run the `flower_app_hist_V1` from this folder you have to run the command 
+```shell
+python nvflare_job.py --job_name "flwr-ml" --flower_app_dir "./flower_app_hist_V1/"
+```
 
 ## How to export app as nvflare job?
 
