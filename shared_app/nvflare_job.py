@@ -21,7 +21,7 @@ def main():
     parser.add_argument("--flower_app_dir", type = str, required = True)
     parser.add_argument("--export_job"    , action = "store_true")
     parser.add_argument("--export_dir"    , type = str, default = "./nvflare_job")
-    parser.add_argument("--workdir"       , type = str, default = "./nvflare_sim")
+    parser.add_argument("--work_dir"      , type = str, default = "./nvflare_sim")
     parser.add_argument("--num_of_clients", type = int, default = 2)
     args = parser.parse_args()
 
@@ -36,8 +36,8 @@ def main():
         print(f"Job exported to {args.export_dir}")
     else:
         job.simulator_run(
-            workspace = args.workdir,
-            n_clients= args.num_of_clients
+            workspace = args.work_dir,
+            n_clients = args.num_of_clients
         )
 
 if __name__ == "__main__":

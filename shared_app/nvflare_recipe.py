@@ -22,7 +22,7 @@ def main():
     parser.add_argument("--flower_app_dir", type = str, required = True)
     parser.add_argument("--export_job"    , action = "store_true")
     parser.add_argument("--export_dir"    , type = str, default = "./nvflare_job")
-    parser.add_argument("--workdir"       , type = str, default = "./nvflare_sim")
+    parser.add_argument("--work_dir"       , type = str, default = "./nvflare_sim")
     parser.add_argument("--num_of_clients", type = int, default = 2)
     args = parser.parse_args()
 
@@ -36,12 +36,11 @@ def main():
         recipe.export(args.export_dir)
         print(f"Job exported to {args.export_dir}")
     else:
-        env = SimEnv(num_clients = args.num_of_clients, workspace_root = args.workdir)
+        env = SimEnv(num_clients = args.num_of_clients, workspace_root = args.work_dir)
         run = recipe.execute(env)
         print("Result can be found in :", run.get_result())
         print("Job Status is:", run.get_status())
         print()
-
 
 if __name__ == "__main__":
     main()
