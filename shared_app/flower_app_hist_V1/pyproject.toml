@@ -12,7 +12,6 @@ authors = [
 ]
 dependencies = [
     "flwr[simulation]>=1.22.0",
-    "flwr-datasets[vision]>=0.5.0",
     "numpy>=2.0.2",
     "pandas==2.2.3",
 	"matplotlib"

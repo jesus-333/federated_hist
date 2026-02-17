@@ -51,7 +51,8 @@ def query(msg : Message, context : Context):
         metadata=Metadata(
             run_id=8348619855088795003,
             message_id='f12007fe252d28bb0f86e7216a657c78588403b20763751b87d4d27a5835486f',
-            src_node_id=1, dst_node_id=11631752601818482563,
+            src_node_id=1, 
+            dst_node_id=11631752601818482563,
             reply_to_message_id='',
             group_id='1',
             created_at=1759151430.732682,
@@ -78,6 +79,12 @@ def query(msg : Message, context : Context):
         run_config={'num-server-rounds': 3, 'fraction-sample': 1.0}
     )
     """
+
+    # This code will be removed in the future, it is just to check the current working directory when the app is launched through NVFlare
+    import pathlib
+    print("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
+    print("Current working directory:", pathlib.Path().resolve())
+    print("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
 
     # Get config (from the message)
     my_config       = msg.content.config_records["my_config"]

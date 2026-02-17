@@ -36,11 +36,20 @@ from flwr.server import Grid, ServerApp
 app = ServerApp()
 
 # The main() decorator specify the main function of the ServerApp, which is the function that will be executed when the server app is run.
+# The main function must always receive as input a Grid instance and a Context instance, which are provided by the Flower framework.
+# The grid instance basically contains the information about the federation, and it is used to send messages to the clients and receive their results.
+# The context instance contains information about the current execution context (e.g. the run_config). Since for the V1 version we hardcode the settings in the server app, we do not use retrive any information from the context instance.
 @app.main()
 def main(grid: Grid, context: Context) -> None:
     """
     This `ServerApp` construct a histogram from partial-histograms reported by the `ClientApp`s.
     """
+
+    # This code will be removed in the future, it is just to check the current working directory when the app is launched through NVFlare
+    import pathlib
+    print("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
+    print("Current working directory:", pathlib.Path().resolve())
+    print("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
     
     # Hardcoded settings
     server_config = dict(
