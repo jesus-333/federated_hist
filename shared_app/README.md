@@ -70,4 +70,4 @@ So for example to export the app `flower_app_hist_V1` from this folder you have 
 python nvflare_job.py --job_name "flwr-ml" --flower_app_dir "./flower_app_hist_V1/" --export_job --export_dir "./job_dir/"
 ```
 
-If the flag `--export_dir` is not specified, all the files of simulation will be placed automatically in a folder called `nvflare_job`
+If the flag `--export_dir` is not specified, all the files will be placed automatically in a folder called `nvflare_job`
