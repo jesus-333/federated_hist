@@ -54,7 +54,7 @@ def main(grid: Grid, context: Context) -> None:
     path_to_save = server_config['path_to_save'] if 'path_to_save' in server_config else './results/'
 
     # Dictionary used to communicate with the clients
-    my_config = server_config['ml_algorithm_config'] 
+    my_config = server_config['ml_algorithm_config']
     my_config['ml_model_name'] = server_config['ml_model_name']
     my_config['fields_to_use_for_the_train'] = fields_to_use_for_train
 
@@ -267,35 +267,3 @@ def get_model_weights_from_clients(grid: Grid, node_ids : list[int], my_config :
     return list_params_per_node
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-def save_results(label : str, info_to_save : dict, final_hist : np.ndarray, samples_mean : float, samples_std : float, path_to_save : str) -> None :
-    """
-    
-    """
-
-    if ":" in info_to_save['bins_variable'] :
-        bins_variable_name = info_to_save['bins_variable'].split(":")[1].strip()
-    else :
-        bins_variable_name = info_to_save['bins_variable']
-
-    path_to_save = os.path.join(path_to_save, bins_variable_name + '/')
-
-    # Add histogram and other info to the dictionary
-    info_to_save['histogram'] = final_hist
-    info_to_save['mean']      = samples_mean
-    info_to_save['std']       = samples_std
-    
-    # Create folder if it does not exist
-    os.makedirs(path_to_save, exist_ok = True)
-
-    # Save info file as a pickle
-    with open(path_to_save + f'results_{label}.pkl', 'wb') as f:
-        pickle.dump(info_to_save, f)
-
-    # Save info file as a toml
-    with open(path_to_save + f'results_{label}.toml', 'w') as f:
-        toml.dump(info_to_save, f)
-
-    # Save histogram and bins as numpy arrays
-    np.save(path_to_save + f'bins_{label}.npy', np.array(info_to_save['bins']))
-    np.save(path_to_save + f'hist_{label}.npy', final_hist)

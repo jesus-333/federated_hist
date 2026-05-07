@@ -28,15 +28,28 @@ st.header("Clinnova User Portal", divider = True)
 #     hist_computation_config = support.build_hist_computation_options()
 
 # hist_canvas = st.container(key = 'hist_canvas', width = 'stretch', height = 400)
-hist_canvas = st.columns([1], border = debug)[0]
 
 column_proportions = [0.5, 0.5]
-ml_training_options_column, ml_plot_options_column = st.columns(column_proportions, border = debug, gap = column_gap)
+ml_training_basic_options_column, ml_training_advanced_options_column = st.columns(column_proportions, border = debug, gap = column_gap)
 
-with ml_training_options_column :
-    hist_computation_config = support_interface_ml.build_ml_computation_options(hist_canvas)
+with ml_training_basic_options_column :
+    support_interface_ml.build_ml_computation_basic_options()
 
-with ml_plot_options_column :
-    support_interface_ml.build_ml_plot_options(hist_canvas)
+with ml_training_advanced_options_column :
+    support_interface_ml.build_ml_computation_settings()
 
 st.write("---")
+
+# Container for the results
+ml_training_results_container = st.container(key = 'ml_training_results_container')
+
+with ml_training_results_container :
+    st.subheader("ML Training Results", divider = True)
+    st.write("The average accuracy of the trained model is: xx.xx%")
+    st.write("Confusion Matrix")
+    st.dataframe({'': ['True Positive', 'False Negative', 'False Positive', 'True Negative'],
+    'Predicted Positive': [50, 5, 3, 42],
+    'Predicted Negative': [2, 48, 4, 46]},
+    use_container_width = True)
+    
+    st.write("Model was saved to: /saved_model/model_SVM.pkl")

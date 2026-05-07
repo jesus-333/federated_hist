@@ -28,13 +28,15 @@ serverapp = "server_app:app"
 clientapp = "client_app:app"
 
 [tool.flwr.app.config]
-path_server_config = './config/server_config_ml.toml'
+path_server_config = '../../config/server_config_ml.toml'
 
 [tool.flwr.federations]
 default = "local-simulation"
 
 [tool.flwr.federations.local-simulation]
-options.num-supernodes = 4
+options.num-supernodes = 2
+address = "127.0.0.1:9093"
+insecure = true
 
 [tool.flwr.federations.local-deployment]
 address = "127.0.0.1:9093"
@@ -45,3 +47,4 @@ insecure = true # To run with insecure connection
 # address = "10.240.18.119:9093" # The address is still the same due to ssh tunneling
 address = "127.0.0.1:9093"
 insecure = true  # Disable TLS (not recommended for production)
+

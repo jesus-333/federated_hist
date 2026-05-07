@@ -23,6 +23,7 @@ import support_ml_app
 # warnings.filterwarnings("ignore", category = UserWarning)
 
 # Flower ClientApp
+# Notes about decorator https://stackoverflow.com/questions/25829364/how-can-i-apply-a-decorator-to-an-imported-function
 app = ClientApp()
 
 @app.train()

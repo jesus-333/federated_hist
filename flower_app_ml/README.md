@@ -23,3 +23,17 @@ The `script` folder contains the scripts used to run the flower app for federate
 
 ### Shell scripts
 
+
+
+<!-- ERROR - failed command 'flwr run --format json --federation-config 'address="127.0.0.1:52246"'   -->
+<!--     /Users/alberto.zancanaro/Desktop/Projects/federated_experiment/flower_app_ml/./tmp/flwr-ml/server/simulate_job/app_server/custom':  -->
+<!--     success=False result={'success': False, 'error-message': "Loading project configuration...  -->
+<!--     Success -->
+<!--     Key 'address' is not present in the main dictionary"} -->
+<!-- 2025-12-05 13:24:25,597 - ERROR - failed to start connector: RuntimeError: failed command  -->
+<!--     'flwr run --format json --federation-config 'address="127.0.0.1:52246"'  /Users/alberto.zancanaro/Desktop/Projects/federated_experiment/flower_app_ml/./tmp/flwr-ml/server/simulate_job/app_server/custom':  -->
+<!--     success=False result={'success': False, 'error-message': "Loading project configuration...  -->
+<!--     Success -->
+<!--     Key 'address' is not present in the main dictionary"} -->
+<!-- 2025-12-05 13:24:25,597 - ERROR - Aborting current RUN due to FATAL_SYSTEM_ERROR received: failed to start connector: RuntimeError: failed command  -->
+<!--     'flwr run --format json --federation-config 'address="127.0.0.1:52246"'  /Users/alberto.zancanaro/Desktop/Projects/federated_experiment/flower_app_ml/./tmp/flwr-ml/server/simulate_job/app_server/custom': success=False result={'success': False, 'error-message': "Loading project configuration... \nSuccess\n\nKey 'address' is not present in the main dictionary"} -->
