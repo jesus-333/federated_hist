@@ -1,0 +1,2 @@
+nvflare[PT]~=2.7.0rc
+tensorboard

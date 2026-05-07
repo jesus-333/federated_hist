@@ -1,2 +1,0 @@
-SRA_metagenome_name
-Fecal.Calprotectin

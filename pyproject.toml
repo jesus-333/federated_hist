@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "Clinnova_Federated_Hist_PoC"
+name = "clinnova-fl"
 version = "1.0.0"
 description = "Proof of Concept (PoC) for a computation of histograms in a federated environment"
 license = "Apache-2.0"
@@ -13,19 +13,29 @@ authors = [
 dependencies = [
     "flwr[simulation]>=1.22.0",
     "flwr-datasets[vision]>=0.5.0",
+    "matplotlib>=3.9.0",
     "numpy>=2.0.2",
     "pandas==2.2.3",
+    "scikit-learn>=1.5.0",
+    "streamlit>=1.37.0",
+    "toml>=0.10.2",
 ]
 
 [tool.hatch.build.targets.wheel]
-packages = ["."]
+packages = ["src/clinnova_fl"]
+
+[project.scripts]
+clinnova-ml = "clinnova_fl.cli:main_ml"
+clinnova-hist = "clinnova_fl.cli:main_hist"
+clinnova-streamlit-ml = "clinnova_fl.ui.streamlit.interface_ml:main"
+clinnova-streamlit-hist = "clinnova_fl.ui.streamlit.interface_hist:main"
 
 [tool.flwr.app]
 publisher = "LCSB"
 
 [tool.flwr.app.components]
-serverapp = "flower_app_hist.server_app:app"
-clientapp = "flower_app_hist.client_app:app"
+serverapp = "clinnova_fl.apps.flower_hist.server:app"
+clientapp = "clinnova_fl.apps.flower_hist.client:app"
 
 [tool.flwr.app.config]
 path_server_config = './config/server_config_hist.toml'

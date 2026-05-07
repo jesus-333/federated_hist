@@ -1,0 +1,22 @@
+"""
+
+@author: Alberto Zancanaro (Jesus)
+@organization: Luxembourg Centre for Systems Biomedicine (LCSB)
+@contact : alberto.zancanaro@uni.lu
+"""
+import streamlit as st
+
+import support_interface_hist
+
+st.set_page_config(page_title = "Clinnova Federated Hist PoC", layout="wide")
+debug = False
+column_gap = 'medium'
+st.header("Clinnova User Portal", divider=True)
+hist_canvas = st.columns([1], border = debug)[0]
+column_proportions = [0.5, 0.5]
+hist_computation_option_column, hist_plot_column = st.columns(column_proportions, border = debug, gap = column_gap)
+with hist_computation_option_column :
+    hist_computation_config = support_interface_hist.build_hist_computation_options(hist_canvas)
+with hist_plot_column :
+    support_interface_hist.build_hist_plot_options(hist_canvas)
+st.write("---")
