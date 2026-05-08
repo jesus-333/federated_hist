@@ -3,7 +3,7 @@ Support functions for FL apps.
 
 Authors
 -------
-Alberto Zancanaro <alberto.zancanaro@uni.lu>
+Alberto (Jesus) Zancanaro <alberto.zancanaro@uni.lu>
 """
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

@@ -19,35 +19,26 @@ import toml
 
 from pathlib import Path
 
+from clinnova_fl import DEBUG_CONFIG_PATH
+
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-def _write_debug_config() -> Path:
+def _write_debug_config(app_name : str) -> Path:
     """
     Create the temporary debug config used by the histogram app.
     """
-    
-    # (OPTIONAL) Create the config directory if it does not exist
-    debug_dir = Path("config")
+
+    template_path = DEBUG_CONFIG_PATH[app_name]
+
+    debug_dir = Path("debug")
     debug_dir.mkdir(parents = True, exist_ok = True)
-    
-    # Create the debug config
-    debug_config = {
-        "app": "flower_hist",
-        "flower_hist_config": {
-            "n_nodes"                : 2,
-            "max_number_of_attempts" : 10,
-            "n_bins"                 : 10,
-            "bins_variable"          : "X",
-            "bins_distribution"      : "uniform",
-            "path_to_save"           : "./results/",
-            "debug"                  : True,
-            "seed"                   : random.randint(0, 2**31 - 1),
-        },
-    }
-    
-    # Write the debug config to a temporary file
-    path_debug_config = debug_dir / "debug.toml"
-    with path_debug_config.open("w", encoding = "utf-8") as f : toml.dump(debug_config, f)
+
+    debug_config = toml.load(template_path)
+    debug_config["flower_hist_config"]["seed"] = random.randint(0, 2**31 - 1)
+
+    path_debug_config = debug_dir / "config_hist.toml"
+    with path_debug_config.open("w", encoding = "utf-8") as f:
+        toml.dump(debug_config, f)
 
     return path_debug_config
 
@@ -68,7 +59,7 @@ def main_hist() -> None:
 
     # Check if arguments are passed
     if args.debug :
-        path_server_config = _write_debug_config()
+        path_server_config = _write_debug_config("flower_hist")
         print(f"Debug mode enabled. Using temporary configuration file: {path_server_config}")
     elif args.config_file is None :
         path_server_config = "./config/hist.toml"
