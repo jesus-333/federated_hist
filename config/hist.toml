@@ -1,0 +1,13 @@
+app="flower_hist"
+
+[flower_hist_config]
+n_nodes = 2
+max_number_of_attempts = 10
+n_bins = 10
+bins_variable = "Age"
+bins_distribution = "uniform"
+path_to_save = "./results/"
+
+[[simulation_data]]
+path_client_data_0 = "./data/client_0_data_D1.csv"
+path_client_data_1 = "./data/client_1_data_D1.csv"
