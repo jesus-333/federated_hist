@@ -46,14 +46,23 @@ def main(grid: Grid, context: Context) -> None:
     # Read the server configuration file
     path_server_config = Path(context.run_config.get("path_server_config", config_path("server_config_hist.toml")))
     server_config = toml.load(path_server_config)
+    
+    # Check if the config contains the "app" section, which specifies the app to run. If not, raise an error.
+    if "app" not in server_config : raise ValueError(f"Error: The provided configuration file does not contain the 'app' section. Currently, the options in the config file are {list(server_config.keys())}.")
 
+    # Check if there are the configuration for the app specified in the "app" section. If not, raise an error.
+    if f"{server_config['app']}_config" not in server_config : raise ValueError(f"Error: The provided configuration file does not contain the '{server_config['app']}_config' section, which is required to run the '{server_config['app']}' app. Currently, the options in the config file are {list(server_config.keys())}.")
+    
+    # Launch the app specified in the configuration file with the corresponding config.
     if server_config["app"] == "flower_hist" :
         from clinnova_fl.fl_apps.flower_hist import server as flower_hist_server
-        flower_hist_server.main(grid, context, server_config)
-    elif server_config["app"] == "flower_ml" :
-        pass
-    elif server_config["app"] == "flower_k_means" :
-        pass
+        flower_hist_server.main(grid, context, server_config['flower_hist_config'])
+    elif "flower_ml_config" in server_config :
+        from clinnova_fl.fl_apps.flower_ml import server as flower_ml_server
+        flower_ml_server.main(grid, context, server_config['flower_ml_config'])
+    elif "flower_k_means" in server_config :
+        from clinnova_fl.fl_apps.flower_k_means import server as flower_k_means_server
+        flower_k_means_server.main(grid, context, server_config['flower_k_means_config'])
     else :
-        raise ValueError(f"Invalid app specified in the server configuration file: {server_config['app']}. Valid options are: {LIST_OF_APPS}")
+        raise ValueError(f"Error: The 'app' value is not valid. Passed value: {server_config['app']}. Valid options are: {LIST_OF_APPS}")
 

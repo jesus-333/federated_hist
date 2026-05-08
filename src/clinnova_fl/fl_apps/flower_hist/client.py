@@ -69,23 +69,38 @@ def query(msg : Message, context : Context):
     )
     """
 
+    # Get config (from the message)
+    my_config = msg.content.config_records["my_config"]
+
     # Get config (node_config)
-    # partition_id = context.node_config["partition-id"]
-    path_client_data = context.node_config["path_client_data"]
+    if "simulation" in context.run_config :
+        # If I run a simulation I cannot pass custom node config, so I need to get the path to the client data from the config sent by the server in the message.
+        path_client_data = my_config["simulation_data"][f"path_client_data_{context.node_id}"]
+    else :
+        # If I run the app normally, the path to the client data is stored obviously in the node config.
+        path_client_data = context.node_config["path_client_data"]
 
     # Remember that the node config is passed as an argument of flower-supernode command.
     # For an example see https://flower.ai/docs/framework/how-to-run-flower-with-deployment-engine.html#start-two-flower-supernodes
-
-    # Get config (from the message)
-    my_config       = msg.content.config_records["my_config"]
-    server_round    = my_config["server_round"]
-    bins_variable   = my_config["bins_variable"]
+    
+    # Histogram parameters
+    server_round  = my_config["server_round"]
+    bins_variable = my_config["bins_variable"]
     
     # Get the dataset
-    data_hist_all, _     = get_data(path_client_data, bins_variable)
-    data_hist_UC, _      = get_data(path_client_data, bins_variable, 'UC')
-    data_hist_CD, _      = get_data(path_client_data, bins_variable, 'CD')
-    data_hist_control, _ = get_data(path_client_data, bins_variable, 'Control')
+    if my_config["debug"] :
+        # In debug mode, I generated a synthetic dataset with a known distribution
+        np.random.seed(my_config["seed"])
+        data_hist_UC, _      = np.random.normal(loc = 0, scale = 1, size = 300), None
+        data_hist_CD, _      = np.random.normal(loc = 1, scale = 1, size = 300), None
+        data_hist_control, _ = np.random.normal(loc = 2, scale = 1, size = 400), None
+        data_hist_all, _     = np.concatenate([data_hist_UC, data_hist_CD, data_hist_control]), None
+    else :
+        # In normal or simulation mode, I load the dataset from a CSV file. The dataset should have a column with the name specified in bins_variable, and a column named "Diagnosis" with the class labels.
+        data_hist_all, _     = get_data(path_client_data, bins_variable)
+        data_hist_UC, _      = get_data(path_client_data, bins_variable, 'UC')
+        data_hist_CD, _      = get_data(path_client_data, bins_variable, 'CD')
+        data_hist_control, _ = get_data(path_client_data, bins_variable, 'Control')
 
     query_results = {}
 

@@ -38,7 +38,7 @@ from clinnova_fl.fl_apps.support_fl import get_data_from_clients, get_node_ids
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Flower ServerApp
 
-def main(grid: Grid, context: Context, server_config) -> None:
+def main(grid: Grid, context: Context, server_config : dict) -> None:
     """
     This `ServerApp` construct a histogram from partial-histograms reported by the `ClientApp`s.
     """
@@ -84,11 +84,16 @@ def main(grid: Grid, context: Context, server_config) -> None:
     path_to_save = server_config['path_to_save'] if 'path_to_save' in server_config else './results/'
     
     # Dictionary used to communicate with the clients
-    my_config = dict(
-        server_round = -1,
-        bins_variable = bins_variable,
-        bins_distribution = bins_distribution
-    )
+    # my_config = dict(
+    #     server_round = -1,
+    #     bins_variable = bins_variable,
+    #     bins_distribution = bins_distribution
+    # )
+    my_config = server_config.copy()
+    my_config['server_round'] = -1
+
+    # Note that I can use the run_config theoretically but it is read-only. And In this case I need to update the config for each round.
+    # So I prefer to use a separate dictionary that I can update as I want and that I can pass as an argument of the get_data_from_clients function, which is the function that send the messages to the clients and receive the results.
 
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     # Min and max computation round (round 0)
