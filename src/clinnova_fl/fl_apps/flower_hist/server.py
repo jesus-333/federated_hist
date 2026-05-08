@@ -169,7 +169,7 @@ def main(grid: Grid, context: Context, server_config : dict) -> None:
 
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# Min-max computation round functions (round 0)
+# Functions for Min-max computation round (Round 0)
 
 def compute_min_max_federation(results_round_zero: Iterable[Message]) -> tuple[float, float]:
     """

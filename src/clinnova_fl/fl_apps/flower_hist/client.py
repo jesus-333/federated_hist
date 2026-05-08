@@ -7,6 +7,8 @@
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Imports
 
+from __future__ import annotations
+
 import numpy as np
 import pandas as pd
 
@@ -72,16 +74,20 @@ def query(msg : Message, context : Context):
     # Get config (from the message)
     my_config = msg.content.config_records["my_config"]
 
-    # Get config (node_config)
-    if "simulation" in context.run_config :
+    # Get path for client data
+    if my_config["debug"] :
+        # In debug mode, I generated a synthetic dataset with a known distribution, so I do not need to get the path to the client data.
+        pass
+    elif "simulation" in context.run_config :
         # If I run a simulation I cannot pass custom node config, so I need to get the path to the client data from the config sent by the server in the message.
         path_client_data = my_config["simulation_data"][f"path_client_data_{context.node_id}"]
     else :
-        # If I run the app normally, the path to the client data is stored obviously in the node config.
+        # If I run the app normally, the path to the client data is stored in the node config.
         path_client_data = context.node_config["path_client_data"]
 
-    # Remember that the node config is passed as an argument of flower-supernode command.
-    # For an example see https://flower.ai/docs/framework/how-to-run-flower-with-deployment-engine.html#start-two-flower-supernodes
+        # Remember that the node config is passed as an argument of flower-supernode command.
+        # So I can customize it only if I created directly the supernode with the flower-supernode command
+        # For an example see https://flower.ai/docs/framework/how-to-run-flower-with-deployment-engine.html#start-two-flower-supernodes
     
     # Histogram parameters
     server_round  = my_config["server_round"]
@@ -97,11 +103,12 @@ def query(msg : Message, context : Context):
         data_hist_all, _     = np.concatenate([data_hist_UC, data_hist_CD, data_hist_control]), None
     else :
         # In normal or simulation mode, I load the dataset from a CSV file. The dataset should have a column with the name specified in bins_variable, and a column named "Diagnosis" with the class labels.
-        data_hist_all, _     = get_data(path_client_data, bins_variable)
         data_hist_UC, _      = get_data(path_client_data, bins_variable, 'UC')
         data_hist_CD, _      = get_data(path_client_data, bins_variable, 'CD')
         data_hist_control, _ = get_data(path_client_data, bins_variable, 'Control')
-
+        data_hist_all, _     = get_data(path_client_data, bins_variable)
+    
+    # Variable to store the results of the query
     query_results = {}
 
     if server_round == 0 :
@@ -172,6 +179,7 @@ def get_data(path_client_data : str, bins_variable : str, class_to_filter : str 
     data_hist = dataset_client[bins_variable].to_numpy()
     
     # Get the labels
+    # TODO : Add a variable to specify the name of the column containing the labels, instead of hardcoding "Diagnosis"
     labels_per_sample = dataset_client['Diagnosis'].to_numpy()
 
     # (OPTIONAL) Filter the data to keep only the specified classes

@@ -66,12 +66,12 @@ def main_hist() -> None:
         print(f"No configuration file provided. Using the default one: {path_server_config}")
     else :
         path_server_config = args.config_file
-
+    
     # Check if arguments are valid
     if not Path(path_server_config).is_file() : # Check if the provided configuration file exists
         print(f"Error: The provided configuration file does not exist: {path_server_config}")
         sys.exit(1)
-    if not path_server_config.endswith(".toml") : # Check if the provided configuration file is a toml file
+    if Path(path_server_config).suffix != ".toml" : # Check if the provided configuration file is a toml file
         print(f"Error: The provided configuration file is not a toml file: {path_server_config}")
         sys.exit(1)
 
