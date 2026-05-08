@@ -31,7 +31,7 @@ from flwr.server import Grid, ServerApp
 
 # Internal imports
 from clinnova_fl.core.config import config_path
-from clinnova_fl import fl_apps
+from clinnova_fl.fl_apps import LIST_OF_APPS
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -48,12 +48,12 @@ def main(grid: Grid, context: Context) -> None:
     server_config = toml.load(path_server_config)
 
     if server_config["app"] == "flower_hist" :
-        fl_apps.flower_hist.server.main(grid, context, server_config)
+        from clinnova_fl.fl_apps.flower_hist import server as flower_hist_server
+        flower_hist_server.main(grid, context, server_config)
     elif server_config["app"] == "flower_ml" :
         pass
     elif server_config["app"] == "flower_k_means" :
         pass
     else :
-        raise ValueError(f"Invalid app specified in the server configuration file: {server_config['app']}. Valid options are: {fl_apps.LIST_OF_APPS}")
-
+        raise ValueError(f"Invalid app specified in the server configuration file: {server_config['app']}. Valid options are: {LIST_OF_APPS}")
 
