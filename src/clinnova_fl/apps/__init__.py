@@ -1,5 +1,5 @@
 """
-The `fl_apps` module contains the implementation of the Flower applications for the CLINNOVA project.
+The `apps` module contains the implementation of the Flower applications for the CLINNOVA project.
 
 Authors
 -------
@@ -14,5 +14,4 @@ LIST_OF_APPS = [
     "flower_k_means",
     "flower_ml",
 ]
-
 

@@ -31,7 +31,7 @@ from flwr.server import Grid, ServerApp
 
 # Internal imports
 from clinnova_fl.core.config import config_path
-from clinnova_fl.fl_apps import LIST_OF_APPS
+from clinnova_fl.apps import LIST_OF_APPS
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -55,14 +55,13 @@ def main(grid: Grid, context: Context) -> None:
     
     # Launch the app specified in the configuration file with the corresponding config.
     if server_config["app"] == "flower_hist" :
-        from clinnova_fl.fl_apps.flower_hist import server as flower_hist_server
+        from clinnova_fl.apps.flower_hist import server as flower_hist_server
         flower_hist_server.main(grid, context, server_config['flower_hist_config'])
     elif "flower_ml_config" in server_config :
-        from clinnova_fl.fl_apps.flower_ml import server as flower_ml_server
+        from clinnova_fl.apps.flower_ml import server as flower_ml_server
         flower_ml_server.main(grid, context, server_config['flower_ml_config'])
     elif "flower_k_means" in server_config :
-        from clinnova_fl.fl_apps.flower_k_means import server as flower_k_means_server
+        from clinnova_fl.apps.flower_k_means import server as flower_k_means_server
         flower_k_means_server.main(grid, context, server_config['flower_k_means_config'])
     else :
         raise ValueError(f"Error: The 'app' value is not valid. Passed value: {server_config['app']}. Valid options are: {LIST_OF_APPS}")
-

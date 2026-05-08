@@ -15,7 +15,7 @@ from flwr.client import ClientApp
 from flwr.common import Context, Message, MetricRecord, RecordDict
 
 # Internal imports
-from clinnova_fl import fl_apps
+from clinnova_fl import apps
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -29,12 +29,11 @@ def query(msg : Message, context : Context) :
     """
 
     if context.run_config["app"] == "flower_hist" :
-        from clinnova_fl.fl_apps.flower_hist.client import query
+        from clinnova_fl.apps.flower_hist.client import query
         return query(msg, context)
     elif context.run_config["app"] == "flower_ml" :
         raise NotImplementedError("The 'flower_ml' app does not have a 'query' function. Use the 'train' function instead.")
     elif context.run_config["app"] == "flower_k_means" :
         pass
     else :
-        raise ValueError(f"Invalid app specified in the server configuration file: {context.run_config['app']}. Valid options are: {fl_apps.LIST_OF_APPS}")
-
+        raise ValueError(f"Invalid app specified in the server configuration file: {context.run_config['app']}. Valid options are: {apps.LIST_OF_APPS}")

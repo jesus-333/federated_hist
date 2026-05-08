@@ -33,7 +33,7 @@ from flwr.common.logger import log
 from flwr.server import Grid
 
 # Internal imports
-from clinnova_fl.fl_apps.support_fl import get_data_from_clients, get_node_ids
+from clinnova_fl.apps.support_fl import get_data_from_clients, get_node_ids
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Flower ServerApp
