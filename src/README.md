@@ -17,18 +17,19 @@ The [`generic`](./clinnova_fl/generic/) module contains basic helper functions u
 
 The [`apps`](./clinnova_fl/apps/) module contains the implementation of the Federated Learning (FL) applications. Its internal structure is as follows:
 
-
 - [`apps/`](./clinnova_fl/apps/)
   - [`__init__.py`](./clinnova_fl/apps/__init__.py)
   - [`client.py`](./clinnova_fl/apps/client.py)
   - [`server.py`](./clinnova_fl/apps/server.py)
   - [`app_1_folder/`](./clinnova_fl/apps/app_1_folder/)
     - [`__init__.py`](./clinnova_fl/apps/app_1_folder/__init__.py)
+    - [`cli.py`](./clinnova_fl/apps/app_1_folder/cli.py)
     - [`client.py`](./clinnova_fl/apps/app_1_folder/client.py)
     - [`server.py`](./clinnova_fl/apps/app_1_folder/server.py)
   - ...
   - [`app_n_folder/`](./clinnova_fl/apps/app_n_folder/)
     - [`__init__.py`](./clinnova_fl/apps/app_n_folder/__init__.py)
+    - [`cli.py`](./clinnova_fl/apps/app_n_folder/cli.py)
     - [`client.py`](./clinnova_fl/apps/app_n_folder/client.py)
     - [`server.py`](./clinnova_fl/apps/app_n_folder/server.py)
 
@@ -37,4 +38,9 @@ Based on the configuration loaded when they are instantiated, they call the app-
 
 For example, if you use the histogram app, [`client.py`](./clinnova_fl/apps/client.py) calls the function in [`./clinnova_fl/apps/flower_hist/client.py`](./clinnova_fl/apps/flower_hist/client.py) and [`server.py`](./clinnova_fl/apps/server.py) calls the function in [`./clinnova_fl/apps/flower_hist/server.py`](./clinnova_fl/apps/flower_hist/server.py).
 
+The `cli.py` file is an optional file that include the logic to call the app directly from the command line.
+
 ### How to add a new app?
+
+
+## CLI Interface

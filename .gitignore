@@ -17,3 +17,4 @@ Tutorial and Notes/flare_examples_backup/
 flower_app_ml/flwr-ml
 shared_app/nvflare_sim/flwr-ml
 shared_app/results_hist_V1/variable_of_interest
+/dist
