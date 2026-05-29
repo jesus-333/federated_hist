@@ -1,8 +1,5 @@
 """
-@author: Alberto Zancanaro (Jesus)
-@organization: Luxembourg Centre for Systems Biomedicine (LCSB)
-@contact : alberto.zancanaro@uni.lu
-@date: September 2025
+Second iteration of the flower hist app
 """
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Imports
@@ -11,8 +8,12 @@ from __future__ import annotations
 
 import numpy as np
 import pandas as pd
+import toml
 
 from flwr.common import Context, Message, MetricRecord, RecordDict
+
+from clinnova_fl.config.connector.generic import get_connector_config
+from clinnova_fl.data_connector.generic import get_connector
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -74,47 +75,44 @@ def query(msg : Message, context : Context):
     # Get config (from the message)
     my_config = msg.content.config_records["my_config"]
 
-    # Get path for client data
+    # Get data connector config (dictionary)
     if my_config["debug"] :
-        # In debug mode, I generated a synthetic dataset with a known distribution, so I do not need to get the path to the client data.
-        pass
-    elif "simulation" in context.run_config :
-        # If I run a simulation I cannot pass custom node config, so I need to get the path to the client data from the config sent by the server in the message.
-        path_client_data = my_config["simulation_data"][f"path_client_data_{context.node_id}"]
+        # In debug mode, I generated a synthetic dataset with a known distribution, so I do not need a data connector
+        data_connector_config = dict()
     else :
-        # If I run the app normally, the path to the client data is stored in the node config.
-        path_client_data = context.node_config["path_client_data"]
+        if "simulation" in context.run_config :
+            # If I run a simulation I cannot pass custom node config, so I need to get the config for the client data from the config sent by the server in the message.
+            path_data_connector_config = my_config["simulation_data"][f"path_data_connector_config_{context.node_id}"]
+        else :
+            # If I run the app normally, the path to the client data is stored in the node config.
+            path_data_connector_config = context.node_config["path_data_connector_config"]
 
         # Remember that the node config is passed as an argument of flower-supernode command.
         # So I can customize it only if I created directly the supernode with the flower-supernode command
         # For an example see https://flower.ai/docs/framework/how-to-run-flower-with-deployment-engine.html#start-two-flower-supernodes
-    
+
+        data_connector_config = toml.load(path_data_connector_config)
+
+    # Convert data_connector_config from dictionary to dataclass
+    data_connector_config = get_connector_config(data_connector_config)
+
+    # Get connector
+    data_connector = get_connector(data_connector_config)
+
     # Histogram parameters
     server_round  = my_config["server_round"]
     bins_variable = my_config["bins_variable"]
     
     # Get the dataset
-    if my_config["debug"] :
-        # In debug mode, I generated a synthetic dataset with a known distribution
-        np.random.seed(my_config["seed"])
-        data_hist_UC, _      = np.random.normal(loc = 0, scale = 1, size = 300), None
-        data_hist_CD, _      = np.random.normal(loc = 1, scale = 1, size = 300), None
-        data_hist_control, _ = np.random.normal(loc = 2, scale = 1, size = 400), None
-        data_hist_all, _     = np.concatenate([data_hist_UC, data_hist_CD, data_hist_control]), None
-    else :
-        # In normal or simulation mode, I load the dataset from a CSV file. The dataset should have a column with the name specified in bins_variable, and a column named "Diagnosis" with the class labels.
-        data_hist_UC, _      = get_data(path_client_data, bins_variable, 'UC')
-        data_hist_CD, _      = get_data(path_client_data, bins_variable, 'CD')
-        data_hist_control, _ = get_data(path_client_data, bins_variable, 'Control')
-        data_hist_all, _     = get_data(path_client_data, bins_variable)
+    data_to_calculate_hist = data_connector.get_data_array()
     
     # Variable to store the results of the query
     query_results = {}
 
     if server_round == 0 :
         # Min-max computation
-        query_results["min"] = np.min(data_hist_all).item()
-        query_results["max"] = np.max(data_hist_all).item()
+        query_results["min"] = np.min(data_to_calculate_hist).item()
+        query_results["max"] = np.max(data_to_calculate_hist).item()
     elif server_round == 1 :
         # Histogram computation
 
@@ -122,26 +120,14 @@ def query(msg : Message, context : Context):
         bins = my_config["bins"]
 
         # Compute histogram
-        freqs_all, _     = np.histogram(data_hist_all, bins = bins)
-        freqs_UC, _      = np.histogram(data_hist_UC, bins = bins)
-        freqs_CD, _      = np.histogram(data_hist_CD, bins = bins)
-        freqs_control, _ = np.histogram(data_hist_control, bins = bins)
+        freqs_all, _ = np.histogram(data_to_calculate_hist, bins = bins)
     
         # Save the histogram
-        query_results["histogram_all"]     = freqs_all.tolist()
-        query_results["histogram_UC"]      = freqs_UC.tolist()
-        query_results["histogram_CD"]      = freqs_CD.tolist()
-        query_results["histogram_control"] = freqs_control.tolist()
+        query_results["histogram"] = freqs_all.tolist()
 
         # Save average and std
-        query_results["average_all"]     = np.mean(data_hist_all).item()
-        query_results["std_all"]         = np.std(data_hist_all).item()
-        query_results["average_UC"]      = np.mean(data_hist_UC).item()
-        query_results["std_UC"]          = np.std(data_hist_UC).item()
-        query_results["average_CD"]      = np.mean(data_hist_CD).item()
-        query_results["std_CD"]          = np.std(data_hist_CD).item()
-        query_results["average_control"] = np.mean(data_hist_control).item()
-        query_results["std_control"]     = np.std(data_hist_control).item()
+        query_results["average"] = np.mean(data_to_calculate_hist).item()
+        query_results["std"]     = np.std(data_to_calculate_hist).item()
     else :
         raise ValueError(f"Server round {server_round} not supported.")
 
@@ -151,45 +137,16 @@ def query(msg : Message, context : Context):
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-def get_data(path_client_data : str, bins_variable : str, class_to_filter : str = None) -> tuple[np.ndarray, np.ndarray]:
+def update_data_connector_config(my_config : dict, data_connector_config : connector.csv.csv_connector_config) :
     """
-    Load the data for a specific client from a CSV file.
-
-    Parameters
-    ----------
-    path_client_data : str
-        The path to the CSV file containing the client data.
-    bins_variable : str
-        The name of the column containing the histogram data.
-    class_to_filter : str
-        The class to keep in the data. If None, all classes are kept. Default is None.
-
-    Returns
-    -------
-    tuple[np.ndarray, np.ndarray]
-        A tuple containing:
-        - data_hist : np.ndarray
-            The histogram data for the specified client.
-        - labels_per_sample : np.ndarray
-            The labels for each sample in the histogram data.
+    Update the data_connector_config with the name of the variable on which you want to compute the histogram
     """
-    
-    # Load the dataset and get the data
-    dataset_client = pd.read_csv(path_client_data)
-    data_hist = dataset_client[bins_variable].to_numpy()
-    
-    # Get the labels
-    # TODO : Add a variable to specify the name of the column containing the labels, instead of hardcoding "Diagnosis"
-    labels_per_sample = dataset_client['Diagnosis'].to_numpy()
 
-    # (OPTIONAL) Filter the data to keep only the specified classes
-    if class_to_filter is not None :
-        
-        # Create a boolean index to keep only the specified classes
-        idx_to_keep = labels_per_sample == class_to_filter
+    if data_connector_config.
 
-        # Filter the data and labels
-        data_hist = data_hist[idx_to_keep]
-        labels_per_sample = labels_per_sample[idx_to_keep]
 
-    return data_hist, labels_per_sample
+
+
+
+
+

@@ -30,7 +30,7 @@ from flwr.common.logger import log
 from flwr.server import Grid, ServerApp
 
 # Internal imports
-from clinnova_fl.core.config import config_path
+# from clinnova_fl.generic.config import config_path
 from clinnova_fl.apps import LIST_OF_APPS
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -40,12 +40,15 @@ app = ServerApp()
 @app.main()
 def main(grid: Grid, context: Context) -> None:
     """
-    This `ServerApp` construct a histogram from partial-histograms reported by the `ClientApp`s.
     """
     
     # Read the server configuration file
-    path_server_config = Path(context.run_config.get("path_server_config", config_path("server_config_hist.toml")))
+    path_server_config = Path(context.run_config["path_server_config"])
     server_config = toml.load(path_server_config)
+    
+    # Alternative version for the server config path. In this case the get function provide a default value in case the "path_server_config" key is not present in the run config. The default value is the path to a default server configuration file.
+    # I'm not sure about this alternative version because probably it is better to raise an error if the config are missing
+    # path_server_config = Path(context.run_config.get("path_server_config", config_path("server_config.toml")))
     
     # Check if the config contains the "app" section, which specifies the app to run. If not, raise an error.
     if "app" not in server_config : raise ValueError(f"Error: The provided configuration file does not contain the 'app' section. Currently, the options in the config file are {list(server_config.keys())}.")

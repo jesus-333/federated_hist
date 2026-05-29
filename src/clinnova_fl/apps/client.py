@@ -28,6 +28,13 @@ def query(msg : Message, context : Context) :
     Call the specific client-side application based on the configuration file received as input.
     """
 
+    print("DEBUG TO REMOVE. INSIDE THE SERVER")
+    print("BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB")
+    print(context)
+    import pprint
+    pprint.pprint(context)
+    print("BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB")
+
     if context.run_config["app"] == "flower_hist" :
         from clinnova_fl.apps.flower_hist.client import query
         return query(msg, context)
