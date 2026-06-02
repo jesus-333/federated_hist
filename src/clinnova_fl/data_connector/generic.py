@@ -11,9 +11,11 @@ Alberto (Jesus) Zancanaro <alberto.zancanaro@uni.lu>
 
 from __future__ import annotations
 
+# General imports
 from abc import ABC, abstractmethod
 import numpy as np
 
+# Internal imports
 from clinnova_fl.config.connector import generic
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -43,7 +45,7 @@ class data_connector(ABC):
         Retrieve data as a 2D numpy array.
     """
     
-    def __init__(self, config : generic.connector_config) -> None:
+    def __init__(self, config : generic.connector_config, node_config : dict = None) :
         """
         Initialize the generic data connector with a configuration.
         
@@ -51,10 +53,14 @@ class data_connector(ABC):
         ----------
         config : generic_connector_config
             The configuration object for this connector.
+        node_config : dict, optional
+            Additional configuration that store information specific for the federated node (e.g. node_id, some key for authentication, etc.).
+            This is optional because not all connectors may need it, but it can be useful for some connectors (e.g. database connectors that need authentication, or API connectors that need an API key).
         """
 
         self.modality = config.modality
         self.config = config
+        self.node_config = node_config
     
     @abstractmethod
     def get_data_array(self) -> np.ndarray:
