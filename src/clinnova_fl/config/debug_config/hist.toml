@@ -1,0 +1,10 @@
+app = "flower_hist"
+
+[flower_hist_config]
+max_number_of_attempts = 10
+n_bins = 10
+bins_variable = "X"
+bins_distribution = "uniform"
+path_to_save = "./results/"
+debug = true
+seed = 42

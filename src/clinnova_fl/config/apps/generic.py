@@ -1,5 +1,5 @@
 """
-Generic connector configuration base class
+Generic app configuration class
 
 Authors
 -------
@@ -25,17 +25,16 @@ import clinnova_fl.config.connector as connector_config_dataclass
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-SUPPORTED_MODALITY = [
-    'debug',
-    'csv'
+IMPLEMENTED_APP = [
+    'flower_hist'
 ]
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 @dataclass
-class connector_config(ABC):
+class app_config(ABC):
     """
-    Abstract base class for all connector configurations.
+    Abstract base class for all app configurations.
     
     This class provides a template for creating specific connector configurations (e.g., CSV, JSON, database connectors). All connector config classes should inherit from this class and implement the required abstract methods.
     
@@ -47,6 +46,8 @@ class connector_config(ABC):
         Load configuration from a dictionary.
     from_toml(toml_path)
         Load configuration from a TOML file.
+    validate()
+        Validate the configuration. Should be called in __post_init__.
     
     Examples
     --------
