@@ -1,5 +1,5 @@
 """
-Debug data connector for generating synthetic data
+synthetic data connector for generating synthetic data
 
 Authors
 -------
@@ -14,42 +14,42 @@ from __future__ import annotations
 import numpy as np
 
 from clinnova_fl.data_connector.generic import generic_data_connector
-from clinnova_fl.config.connector.debug import debug_connector_config
+from clinnova_fl.config.connector.synthetic import synthetic_connector_config
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 
-class debug_data_connector(generic_data_connector):
+class synthetic_data_connector(generic_data_connector):
     """
-    Data connector for generating synthetic debug data.
+    Data connector for generating synthetic synthetic data.
     
     This connector generates random data from different distributions for testing and debugging purposes.
     
     Attributes
     ----------
     modality : str
-        Always set to 'debug'.
-    config : debug_connector_config
-        Configuration for the debug connector.
+        Always set to 'synthetic'.
+    config : synthetic_connector_config
+        Configuration for the synthetic connector.
     
     Examples
     --------
-    >>> config = debug_connector_config(distribution='normal', size=300, seed=123)
-    >>> connector = debug_data_connector(config)
+    >>> config = synthetic_connector_config(distribution='normal', size=300, seed=123)
+    >>> connector = synthetic_data_connector(config)
     >>> data = connector.get_data_array()
     """
     
-    def __init__(self, config : debug_connector_config) -> None:
+    def __init__(self, config : synthetic_connector_config) -> None:
         """
-        Initialize the debug data connector.
+        Initialize the synthetic data connector.
         
         Parameters
         ----------
-        config : debug_connector_config
+        config : synthetic_connector_config
             The configuration object for this connector.
         """
         super().__init__(config)
-        self.config: debug_connector_config = config
+        self.config : synthetic_connector_config = config
     
     def get_data_array(self) -> np.ndarray:
         """
@@ -63,9 +63,9 @@ class debug_data_connector(generic_data_connector):
         np.random.seed(self.config.seed)
         
         if self.config.distribution == 'normal':
-            return np.random.normal(loc = 0, scale = 1, size = self.config.size)
+            return np.random.normal(loc = self.config.loc, scale = self.config.scale, size = self.config.size_1D_array)
         elif self.config.distribution == 'uniform':
-            return np.random.uniform(low = 0, high = 1, size = self.config.size)
+            return np.random.uniform(low = self.config.low, high = self.config.high, size = self.config.size_1D_array)
         else:
             raise ValueError(f"Distribution '{self.config.distribution}' not supported.")
     
