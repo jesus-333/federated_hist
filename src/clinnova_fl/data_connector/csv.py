@@ -15,7 +15,7 @@ import numpy as np
 import pandas as pd
 
 import clinnova_fl.config.connector.csv as config
-from clinnova_fl.data_connector.generic import generic_data_connector
+from clinnova_fl.data_connector.generic import data_connector as generic_data_connector
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -25,8 +25,7 @@ class data_connector(generic_data_connector):
     Data connector for CSV files.
     
     This connector retrieves data from CSV files with optional filtering capabilities.
-    See the docstring of :class:`~clinnova_fl.config.connector.csv.csv_connector_config` 
-    for the configuration options, including filtering.
+    See the docstring of :class:`~clinnova_fl.config.connector.csv.csv_connector_config`for the configuration options.
     
     Attributes
     ----------
@@ -37,26 +36,8 @@ class data_connector(generic_data_connector):
     
     Examples
     --------
-    Basic usage without filtering:
+    TODO 
     
-    >>> connector_config = csv_connector_config(
-    ...     file_path="data.csv",
-    ...     field_name="age"
-    ... )
-    >>> connector = csv_data_connector(connector_config)
-    >>> data = connector.get_data_array()
-    
-    With filtering:
-    
-    >>> connector_config = csv_connector_config(
-    ...     file_path="data.csv",
-    ...     field_name="age",
-    ...     filter_field="country",
-    ...     filter_type="equals",
-    ...     filter_value="USA"
-    ... )
-    >>> connector = csv_data_connector(connector_config)
-    >>> data = connector.get_data_array()
     """
 
     def __init__(self, config : config.csv_connector_config) -> None:
@@ -69,59 +50,61 @@ class data_connector(generic_data_connector):
             The configuration object for this connector.
         """
         super().__init__(config)
-        self.config: config.csv_connector_config = config
-    
-    def get_data_array(self) -> np.ndarray:
+
+        # Save the config
+        self.config : config.csv_connector_config = config
+
+        # Load the dataset
+        # Note that from a security perspective, loading a csv file here and keep it as an attribute can be consider not ideal.
+        # Loading on the fly inside the __get_item__ method would be more secure, but it would also be less efficient.
+        # For now it is here because all of this is a prototype, but this kind of security issues should be discussed and addressed in the future.
+        self.data = pd.read_csv(self.config.file_path)
+
+    def __get_item__(self, idx) :
         """
-        Get an array of data from a csv file. The data are returned as a numpy array.
+        Return the row(s) specified by idx. The value of idx can be an integer index, a list of integer indices, a slice object (or any other type of index supported by pandas iloc).
+        """
+
+        return self.data.iloc[idx].to_numpy()
+
+    def get_feature(self, feature_name : str) -> np.ndarray :
+        """
+        Get a specific feature from the dataset as a numpy array.
+
+        Parameters
+        ----------
+        feature_name : str
+            The name of the feature to retrieve.
 
         Returns
         -------
         np.ndarray
-            A numpy array containing the extracted data.
+            A numpy array containing the values of the specified feature.
         """
 
-        # Load the data and get the data
-        dataset = pd.read_csv(self.config.file_path)
-        data = dataset[self.config.field_name].to_numpy()
-        
-        # Check if filtering is needed
-        if self.config.filter_field is not None:
-            # Filtering required
+        return self.data[feature_name].to_numpy()
 
-            # Get the data for filtering and compute the indices of the rows to keep
-            data_for_filtering = dataset[self.config.filter_field].to_numpy()
-            idx_to_keep = None
-            
-            # Compute the indices of the rows to keep based on the filter type
-            if self.config.filter_type == 'equals':
-                idx_to_keep = data_for_filtering == self.config.filter_value
-            elif self.config.filter_type == 'less_than':
-                idx_to_keep = data_for_filtering < self.config.filter_value
-            elif self.config.filter_type == 'greater_than':
-                idx_to_keep = data_for_filtering > self.config.filter_value
-            elif self.config.filter_type == 'less_than_or_equal_to':
-                idx_to_keep = data_for_filtering <= self.config.filter_value
-            elif self.config.filter_type == 'greater_than_or_equal_to':
-                idx_to_keep = data_for_filtering >= self.config.filter_value
-            else:
-                raise ValueError(f"Filter type {self.config.filter_type} not supported. Supported filter types are: 'equals', 'less_than', 'greater_than', 'less_than_or_equal_to', 'greater_than_or_equal_to'.")
-            
-            # Filter and return the data
-            return data[idx_to_keep]
-        else:
-            # Return directly all the data
-            return data
-
-    def get_data_matrix(self) -> np.ndarray:
+    def get_filtered_keys(self, feature : str, comparison_type : str, filter_value) -> np.ndarray :
         """
-        Get a matrix of data from a csv file. The data are returned as a numpy array.
+        Return the keys of the samples that satisfy the specified filter condition based on a feature value.
+
+        Parameters
+        ----------
+        feature : str
+            The name of the feature to use for filtering.
+        comparison_type : str
+            The type of comparison to perform. Supported values are: 'equals', 'less_than', 'greater_than', 'less_than_or_equal_to', 'greater_than_or_equal_to'.
+        filter_value
+            The value to compare the feature values against for filtering.
 
         Returns
         -------
         np.ndarray
-            A 2D numpy array containing the extracted data.
+            A numpy array containing the indices of the samples that satisfy the specified filter condition.
         """
 
-        # TODO
-        raise NotImplementedError("get_data_matrix is not implemented yet.")
+        if feature not in self.data.columns : raise ValueError(f"Feature '{feature}' not found in the dataset. Available features are: {self.data.columns.tolist()}")
+
+        return super().compare_numerical_features(feature, comparison_type, filter_value)
+
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

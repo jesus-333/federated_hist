@@ -13,7 +13,7 @@ authors = [
     { name = "Alberto Zancanaro", email = "alberto.zancanaro@uni.lu" },
 ]
 dependencies = [
-    "flwr[simulation]>=1.22.0",
+    "flwr[simulation]>=1.28.0",
     "flwr-datasets[vision]>=0.5.0",
     "matplotlib>=3.9.0",
     "numpy>=2.0.2",
@@ -24,7 +24,7 @@ dependencies = [
 ]
 
 [project.scripts]
-clinnova-hist = "clinnova_fl.cli:main_hist"
+clinnova-hist = "clinnova_fl.cli:flower_hist"
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
@@ -39,8 +39,15 @@ publisher = "LCSB"
 serverapp = "clinnova_fl.apps.server:app"
 clientapp = "clinnova_fl.apps.client:app"
 
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+# Config for all flower apps
+
 [tool.flwr.app.config]
-path_server_config = './config/server_config_hist.toml'
+app = "X"
+path_app_config = "X"
+dataset_id = "X"
+simulation = false
+run_with_nvflare = false
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 # OLD NETWORK CONFIG (pre flwr 1.28)

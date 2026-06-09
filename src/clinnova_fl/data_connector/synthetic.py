@@ -13,13 +13,13 @@ from __future__ import annotations
 
 import numpy as np
 
-from clinnova_fl.data_connector.generic import generic_data_connector
+from clinnova_fl.data_connector.generic import data_connector as generic_data_connector
 from clinnova_fl.config.connector.synthetic import synthetic_connector_config
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 
-class synthetic_data_connector(generic_data_connector):
+class data_connector(generic_data_connector):
     """
     Data connector for generating synthetic synthetic data.
     
@@ -49,35 +49,69 @@ class synthetic_data_connector(generic_data_connector):
             The configuration object for this connector.
         """
         super().__init__(config)
+
         self.config : synthetic_connector_config = config
-    
-    def get_data_array(self) -> np.ndarray:
-        """
-        Generate synthetic data as a 1D numpy array.
-        
-        Returns
-        -------
-        np.ndarray
-            A 1D numpy array containing synthetic data.
-        """
+
         np.random.seed(self.config.seed)
-        
+
         if self.config.distribution == 'normal':
-            return np.random.normal(loc = self.config.loc, scale = self.config.scale, size = self.config.size_1D_array)
+            self.data = np.random.normal(loc = self.config.loc, scale = self.config.scale, size = self.config.shape)
         elif self.config.distribution == 'uniform':
-            return np.random.uniform(low = self.config.low, high = self.config.high, size = self.config.size_1D_array)
+            self.data = np.random.uniform(low = self.config.low, high = self.config.high, size = self.config.shape)
         else:
             raise ValueError(f"Distribution '{self.config.distribution}' not supported.")
-    
-    def get_data_matrix(self) -> np.ndarray:
-        """
-        Generate synthetic data as a 2D numpy array.
         
+        # Create preferix for the feature names. Use feature_1, feature_2, ..., feature_n for n features.
+        if len(self.config.shape) == 2 :
+            # Note that features make sense only if the data is 2D.
+            self.features = [f"feature_{i + 1}" for i in range(self.config.shape[1])]
+        else :
+            self.features = None
+
+    def __get_item__(self, idx) :
+        """
+        Return the row(s) specified by idx. The value of idx can be an integer index, a list of integer indices, a slice object (or any other type of index supported by pandas iloc).
+        """
+
+        return self.data[idx].to_numpy()
+
+    def get_feature(self, feature_name : str) -> np.ndarray :
+        """
+        Get a specific feature from the dataset as a numpy array.
+
+        Parameters
+        ----------
+        feature_name : str
+            The name of the feature to retrieve.
+
         Returns
         -------
         np.ndarray
-            A 2D numpy array containing synthetic data (1 column).
+            A numpy array containing the values of the specified feature.
         """
 
-        # TODO
-        raise NotImplementedError("get_data_matrix is not implemented yet.")
+        if self.features is None :
+            raise ValueError("The data is not 2D, so features are not defined.")
+        else :
+            if feature_name not in self.features :
+                raise ValueError(f"Feature '{feature_name}' not found. Available features are: {self.features}")
+            else :
+                feature_idx = self.features.index(feature_name)
+                return self.data[:, feature_idx]
+
+    def get_filtered_keys(self, feature : str, comparison_type : str, filter_value) -> np.ndarray :
+        """
+        Return the keys of the samples that satisfy the specified filter condition based on a feature value.
+        """
+
+        if self.features is None :
+            raise ValueError("The data is not 2D, so features are not defined.")
+        else :
+            if feature not in self.features :
+                raise ValueError(f"Feature '{feature}' not found. Available features are: {self.features}")
+            else :
+                return super().compare_numerical_features(feature, comparison_type, filter_value)
+
+
+
+

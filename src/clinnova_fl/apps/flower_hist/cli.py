@@ -11,36 +11,15 @@ Alberto Zancanaro <alberto.zancanaro@uni.lu>
 
 from __future__ import annotations
 
-import random
 import subprocess
 import sys
 import toml
 
 from pathlib import Path
 
-from clinnova_fl import DEBUG_CONFIG_PATH
+from clinnova_fl.cli import write_debug_config
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-def _write_debug_config(app_name : str) -> Path:
-    """
-    Create the temporary debug config used by the histogram app.
-    """
-
-    template_path = DEBUG_CONFIG_PATH[app_name]
-
-    debug_dir = Path("debug")
-    debug_dir.mkdir(parents = True, exist_ok = True)
-
-    debug_config = toml.load(template_path)
-    debug_config["flower_hist_config"]["seed"] = random.randint(0, 2**31 - 1)
-
-    path_debug_config = debug_dir / "config_hist.toml"
-
-    with path_debug_config.open("w", encoding = "utf-8") as f:
-        toml.dump(debug_config, f)
-
-    return path_debug_config
 
 def main_hist(args, flwr_args) -> None:
     """
@@ -51,8 +30,8 @@ def main_hist(args, flwr_args) -> None:
     # Check if arguments are passed
 
     if args.debug :
-        path_server_config = _write_debug_config("flower_hist")
-        print(f"Debug mode enabled. Using temporary configuration file: {path_server_config}")
+        path_server_config = write_debug_config("flower_hist")
+        print(f"Debug mode enabled. A copy of the config used is saved at : {path_server_config}")
     elif args.config_file is None :
         path_server_config = "./config/hist.toml"
         print(f"No configuration file provided. Using the default one: {path_server_config}")

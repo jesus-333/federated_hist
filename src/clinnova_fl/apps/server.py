@@ -41,30 +41,57 @@ app = ServerApp()
 def main(grid: Grid, context: Context) -> None:
     """
     """
-    
-    # Read the server configuration file
-    path_server_config = Path(context.run_config["path_server_config"])
-    server_config = toml.load(path_server_config)
-    
-    # Alternative version for the server config path. In this case the get function provide a default value in case the "path_server_config" key is not present in the run config. The default value is the path to a default server configuration file.
-    # I'm not sure about this alternative version because probably it is better to raise an error if the config are missing
-    # path_server_config = Path(context.run_config.get("path_server_config", config_path("server_config.toml")))
-    
-    # Check if the config contains the "app" section, which specifies the app to run. If not, raise an error.
-    if "app" not in server_config : raise ValueError(f"Error: The provided configuration file does not contain the 'app' section. Currently, the options in the config file are {list(server_config.keys())}.")
 
-    # Check if there are the configuration for the app specified in the "app" section. If not, raise an error.
-    if f"{server_config['app']}_config" not in server_config : raise ValueError(f"Error: The provided configuration file does not contain the '{server_config['app']}_config' section, which is required to run the '{server_config['app']}' app. Currently, the options in the config file are {list(server_config.keys())}.")
+    # Check if app is specified in the configuration. If not, raise an error.
+    if "app" not in context.run_config : raise ValueError(f"Error: The provided configuration file does not contain the 'app' key, which is required to run the an app. Currently, the options in the config file are {list(context.run_config.keys())}.")
     
-    # Launch the app specified in the configuration file with the corresponding config.
-    if server_config["app"] == "flower_hist" :
-        from clinnova_fl.apps.flower_hist import server as flower_hist_server
-        flower_hist_server.main(grid, context, server_config['flower_hist_config'])
-    elif "flower_ml_config" in server_config :
-        from clinnova_fl.apps.flower_ml import server as flower_ml_server
-        flower_ml_server.main(grid, context, server_config['flower_ml_config'])
-    elif "flower_k_means" in server_config :
-        from clinnova_fl.apps.flower_k_means import server as flower_k_means_server
-        flower_k_means_server.main(grid, context, server_config['flower_k_means_config'])
-    else :
-        raise ValueError(f"Error: The 'app' value is not valid. Passed value: {server_config['app']}. Valid options are: {LIST_OF_APPS}")
+    # Check that the specified app is valid. If not, raise an error.
+    if context.run_config["app"] not in LIST_OF_APPS : raise ValueError(f"Error: The 'app' value is not valid. Passed value: {context.run_config['app']}. Valid options are: {LIST_OF_APPS}")
+
+    # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+    # Check if the app configuration file path is specified in the configuration. If not, raise an error.
+    if "path_app_config" not in context.run_config : raise ValueError(f"Error: The provided configuration file does not contain the 'path_app_config' key, which is required to run the an app. Currently, the options in the config file are {list(context.run_config.keys())}.")
+
+    # Load app config
+    app_config = read_toml_config(Path(context.run_config["path_app_config"]))
+
+    # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    # Check if dataset_id is specified in the app configuration. If not, raise an error.
+    if "dataset_id" not in app_config : raise ValueError(f"Error: The provided app configuration file does not contain the 'dataset_id' key, which is required to run the an app. Currently, the options in the app config file are {list(app_config.keys())}.")
+
+    # Load data connector config
+    dataset_id = read_toml_config(Path(app_config['dataset_id ']))
+
+    # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    # Prepare experiment config
+
+    experiment_config = dict(
+        app = context.run_config["app"],
+        app_config = app_config,
+        dataset_id = dataset_id,
+        simulation = context.run_config['simulation']
+    )
+
+    # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    
+    # Import the requested app
+    if context.run_config["app"] == "flower_hist" :
+        from clinnova_fl.apps.flower_hist import server
+    elif context.run_config["app"] == "flower_ml" :
+        from clinnova_fl.apps.flower_ml import server
+    elif context.run_config["app"] == "flower_k_means" :
+        from clinnova_fl.apps.flower_k_means import server
+    
+    # Launch the app
+    server.main(grid, context, experiment_config)
+
+def read_toml_config(path_toml_config : Path) -> dict :
+    """
+    Read a toml configuration file and return it as a dictionary.
+    """
+    try :
+        config = toml.load(path_toml_config)
+        return config
+    except Exception as e :
+        raise ValueError(f"Error while reading the configuration file at {path_toml_config}.\n\nError raised :\n{e}")

@@ -26,8 +26,8 @@ import clinnova_fl.config.connector as connector_config_dataclass
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 SUPPORTED_MODALITY = [
-    'debug',
     'csv'
+    'synthetic',
 ]
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -183,6 +183,8 @@ def get_connector_config(connector_config_dict : dict) :
 
     if modality == 'csv' :
         connector_config = connector_config_dataclass.csv.csv_connector_config.from_dict(connector_config_dict)
+    elif modality == 'synthetic' :
+        connector_config = connector_config_dataclass.synthetic.synthetic_connector_config.from_dict(connector_config_dict)
     else :
         raise ValueError(f'Modality {modality} not supported. Currently supported modalities are: {SUPPORTED_MODALITY}')
 

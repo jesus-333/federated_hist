@@ -33,35 +33,38 @@ from flwr.common.logger import log
 from flwr.server import Grid
 
 # Internal imports
-from clinnova_fl.apps.support_fl import get_data_from_clients_through_query, get_node_ids
+from clinnova_fl.apps.support_fl import get_data_from_clients, get_node_ids
 from clinnova_fl.apps.flower_hist import support
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Flower ServerApp
 
-def main(grid: Grid, context: Context, server_config : dict) -> None:
+def main(grid: Grid, context: Context, experiment_config : dict) -> None:
     """
     This `ServerApp` construct a histogram from partial-histograms reported by the `ClientApp`s.
     """
 
-    # path_server_config = context.run_config['path_server_config'] if 'path_server_config' in context.run_config else './server_config.toml'
-    # path_server_config = Path(context.run_config.get("path_server_config", config_path("server_config_hist.toml")))
-    # server_config = toml.load(path_server_config)
+    # path_experiment_config = context.run_config['path_experiment_config'] if 'path_experiment_config' in context.run_config else './experiment_config.toml'
+    # path_experiment_config = Path(context.run_config.get("path_experiment_config", config_path("experiment_config_hist.toml")))
+    # experiment_config = toml.load(path_experiment_config)
+    
+    # import pprint
+    # pprint.pprint(experiment_config)
 
     # Federation settings
-    # min_nodes specify the minimum number of nodes required to start the histogram computation. If not specified, it is set to n_nodes (the total number of nodes connected to the grid).
+    # min_nodes specify the minimum number of nodes required to start the histogram computation. If not specified, it will be set to 1. See the docstring of the function get_node_ids in support_fl.py for more details about this choice.
     # max_number_of_attempts specify the maximum number of attempts to send the messages and receive the results from the clients. If not specified, it is set to 10. If this number is reached, an exception is raised.
-    min_nodes              = server_config['min_nodes'] if 'min_nodes' in server_config else server_config['n_nodes']
-    max_number_of_attempts = server_config['max_number_of_attempts'] if 'max_number_of_attempts' in server_config else 10
+    min_nodes              = experiment_config['min_nodes'] if 'min_nodes' in experiment_config else 1
+    max_number_of_attempts = experiment_config['max_number_of_attempts'] if 'max_number_of_attempts' in experiment_config else 10
     
     # Histrogram settings
-    # This app will create an histrogram with n_bins, distributed between min and max. 
+    # This app will create an histrogram with n_bins, distributed between min and max.
     # bins_variable specify the name, inside the dataset, of the variable for which the histogram will be created. It is used by the clients to create the local histograms and by the server to create the bins.
     # bins_distribution specify how the bins are distributed between min and max. It can be either 'uniform' or 'logarithmic'. In the first case the bins are uniformly distributed, in the second case they are logarithmically distributed.
     max, min = None, None
-    n_bins = server_config['n_bins'] if 'n_bins' in server_config else 10
-    bins_variable = server_config['bins_variable'] if 'bins_variable' in server_config else None
-    bins_distribution = server_config['bins_distribution'] if 'bins_distribution' in server_config else 'uniform'
+    n_bins = experiment_config['n_bins'] if 'n_bins' in experiment_config else 10
+    bins_variable = experiment_config['bins_variable'] if 'bins_variable' in experiment_config else None
+    bins_distribution = experiment_config['bins_distribution'] if 'bins_distribution' in experiment_config else 'uniform'
 
     # Check settings
     if min_nodes <= 0 :
@@ -78,11 +81,11 @@ def main(grid: Grid, context: Context, server_config : dict) -> None:
     # Predefined min and max could be used. By default they are None
     # If both are provided the round 0 for min-max computation will be skipped, otherwise the missing value will be computed
     # If only one of the two values is provided, the round 0 will be performed to compute the missing value. This allows to use a predefined min and compute the max from the data, or vice versa.
-    predefined_min = server_config['predefined_min'] if 'predefined_min' in server_config else None
-    predefined_max = server_config['predefined_max'] if 'predefined_max' in server_config else None
+    predefined_min = experiment_config['predefined_min'] if 'predefined_min' in experiment_config else None
+    predefined_max = experiment_config['predefined_max'] if 'predefined_max' in experiment_config else None
     
     # Path to save the final histogram
-    path_to_save = server_config['path_to_save'] if 'path_to_save' in server_config else './results/'
+    path_to_save = experiment_config['path_to_save'] if 'path_to_save' in experiment_config else './results/'
     
     # Dictionary used to communicate with the clients
     # my_config = dict(
@@ -90,7 +93,7 @@ def main(grid: Grid, context: Context, server_config : dict) -> None:
     #     bins_variable = bins_variable,
     #     bins_distribution = bins_distribution
     # )
-    my_config = server_config.copy()
+    my_config = experiment_config.copy()
     my_config['server_round'] = -1
 
     # Note that I can use the run_config theoretically but it is read-only. And In this case I need to update the config for each round.
@@ -111,7 +114,7 @@ def main(grid: Grid, context: Context, server_config : dict) -> None:
         node_ids_round = get_node_ids(grid, min_nodes)
         
         # Get the min and max from the clients
-        results_round_zero = get_data_from_clients_through_query(grid, node_ids_round, my_config, max_number_of_attempts)
+        results_round_zero = get_data_from_clients(MessageType.QUERY, grid, node_ids_round, my_config, max_number_of_attempts)
 
         # Compute global min and max
         min, max = compute_min_max_federation(results_round_zero)
@@ -158,17 +161,14 @@ def main(grid: Grid, context: Context, server_config : dict) -> None:
     my_config['bins'] = list(bins)
     
     # Get the partial histograms from the clients
-    results_round_one = get_data_from_clients_through_query(grid, node_ids_round, my_config, max_number_of_attempts)
+    results_round_one = get_data_from_clients(MessageType.QUERY, grid, node_ids_round, my_config, max_number_of_attempts)
     
     # Compute final histogram
     final_hist, samples_mean, samples_std = compute_hist(n_bins, results_round_one)
     log(INFO, f"Final histogram : {final_hist}")
 
     # Save results
-    label = 
-    save_results(label, my_config, final_hist_per_label[label], samples_mean_per_label[label], samples_std_per_label[label], path_to_save)
-    for label in ['all', 'UC', 'CD', 'control'] :
-        save_results(label, my_config, final_hist_per_label[label], samples_mean_per_label[label], samples_std_per_label[label], path_to_save)
+    save_results(my_config, final_hist, samples_mean, samples_std, path_to_save)
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Functions for Min-max computation round (Round 0)

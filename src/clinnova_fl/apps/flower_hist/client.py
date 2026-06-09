@@ -6,18 +6,20 @@ Second iteration of the flower hist app
 
 from __future__ import annotations
 
+# General imports
 import numpy as np
 import pandas as pd
 import toml
 
+# Flower imports
 from flwr.common import Context, Message, MetricRecord, RecordDict
 
-from clinnova_fl.config.connector.generic import get_connector_config
-from clinnova_fl.data_connector.generic import get_connector
+# Internal imports
+from clinnova_fl.data_connector.generic import data_connector
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-def query(msg : Message, context : Context):
+def query(msg : Message, context : Context, data_connector : data_connector):
     """
     Construct histogram of local dataset and report to `ServerApp`.
     """
@@ -75,30 +77,6 @@ def query(msg : Message, context : Context):
     # Get config (from the message)
     my_config = msg.content.config_records["my_config"]
 
-    # Get data connector config (dictionary)
-    if my_config["debug"] :
-        # In debug mode, I generated a synthetic dataset with a known distribution, so I do not need a data connector
-        data_connector_config = dict()
-    else :
-        if "simulation" in context.run_config :
-            # If I run a simulation I cannot pass custom node config, so I need to get the config for the client data from the config sent by the server in the message.
-            path_data_connector_config = my_config["simulation_data"][f"path_data_connector_config_{context.node_id}"]
-        else :
-            # If I run the app normally, the path to the client data is stored in the node config.
-            path_data_connector_config = context.node_config["path_data_connector_config"]
-
-        # Remember that the node config is passed as an argument of flower-supernode command.
-        # So I can customize it only if I created directly the supernode with the flower-supernode command
-        # For an example see https://flower.ai/docs/framework/how-to-run-flower-with-deployment-engine.html#start-two-flower-supernodes
-
-        data_connector_config = toml.load(path_data_connector_config)
-
-    # Convert data_connector_config from dictionary to dataclass
-    data_connector_config = get_connector_config(data_connector_config)
-
-    # Get connector
-    data_connector = get_connector(data_connector_config)
-
     # Histogram parameters
     server_round  = my_config["server_round"]
     bins_variable = my_config["bins_variable"]
@@ -137,13 +115,12 @@ def query(msg : Message, context : Context):
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-def update_data_connector_config(my_config : dict, data_connector_config : connector.csv.csv_connector_config) :
-    """
-    Update the data_connector_config with the name of the variable on which you want to compute the histogram
-    """
-
-    if data_connector_config.
-
+# def update_data_connector_config(my_config : dict, data_connector_config : connector.csv.csv_connector_config) :
+#     """
+#     Update the data_connector_config with the name of the variable on which you want to compute the histogram
+#     """
+#
+#     if data_connector_config.
 
 
 

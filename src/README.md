@@ -1,3 +1,5 @@
+TO UPDATE
+
 # Package Structure
 
 The package structure of this project is organized as follows:
@@ -6,12 +8,11 @@ The package structure of this project is organized as follows:
 - [`clinnova_fl/`](./clinnova_fl/)
   - [`__init__.py`](./clinnova_fl/__init__.py)
   - [`apps/`](./clinnova_fl/apps/)
-  - [`generic/`](./clinnova_fl/generic/)
+  - [`config/`](./clinnova_fl/config/)
+  - [`data_connector/`](./clinnova_fl/data_connector/)
+  - [`dataset/`](./clinnova_fl/dataset/)
   - [`ui/`](./clinnova_fl/ui/)
 
-## `generic` module
-
-The [`generic`](./clinnova_fl/generic/) module contains basic helper functions used by other modules, such as data loading and ML definitions.
 
 ## `apps` module
 
@@ -42,5 +43,14 @@ The `cli.py` file is an optional file that include the logic to call the app dir
 
 ### How to add a new app?
 
+## `config` module
+
+## `data_connector` module
+
+Provide the interaction between raw data and dataset
+
+## `dataset` module
+
+Provide the interface between data federated app and data
 
 ## CLI Interface

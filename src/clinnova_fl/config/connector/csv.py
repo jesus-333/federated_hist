@@ -1,5 +1,5 @@
 """
-Configuration classes for data connectors
+CSV connector configuration, used to read data from csv file
 
 Authors
 -------

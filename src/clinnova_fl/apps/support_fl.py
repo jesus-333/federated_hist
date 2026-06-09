@@ -25,7 +25,7 @@ from flwr.server import Grid
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Network functions
 
-def get_node_ids(grid: Grid, min_nodes: int) -> list[int]:
+def get_node_ids(grid: Grid, min_nodes: int, max_number_of_attempts : int = 10) -> list[int]:
     """
     Loop and wait until enough nodes are available.
     N.b. this is not a predefined flower function, but a custom function implemented for this app.
@@ -37,18 +37,25 @@ def get_node_ids(grid: Grid, min_nodes: int) -> list[int]:
         See https://flower.ai/docs/framework/ref-api/flwr.serverapp.Grid.html for more details.
     min_nodes : int
         Minimum number of nodes required.
+        If set to a number greater than 1 the function will loop and wait until at least that number of nodes are available.
+        Otherwise, if set to 1, the function will return as soon as at least one node is available (i.e. return all the nodes that you find at the moment, without waiting for more nodes to connect).
+    max_number_of_attempts : int, optional
+        Maximum number of attempts to check for available nodes, by default 10.
+        If the maximum number of attempts is reached and there are still not enough nodes available, an exception is raised.
 
     Returns
     -------
     list[int]
         List of all node ids.
     """
+
+    if min_nodes <= 0 : raise ValueError(f"min_nodes must be greater than 0. Current value is {min_nodes}")
     
     # List for storing all node ids
     all_node_ids : list[int] = []
 
     # Loop until enough nodes are available
-    while len(all_node_ids) < min_nodes:
+    for i in range(max_number_of_attempts) :
         # Fetch all node ids
         all_node_ids = list(grid.get_node_ids())
 
@@ -60,21 +67,26 @@ def get_node_ids(grid: Grid, min_nodes: int) -> list[int]:
         log(INFO, "Waiting for nodes to connect...")
         time.sleep(2)
 
+    if len(all_node_ids) < min_nodes : raise Exception(f"Not enough nodes available. Minimum required is {min_nodes}, but only {len(all_node_ids)} are available after {max_number_of_attempts} attempts.")
+
     return all_node_ids
 
-def send_and_receive_data_through_query(grid: Grid, node_ids: list[int], server_round: int, my_config : dict = None) :
+def send_and_receive_data(message_type : MessageType, grid: Grid, node_ids: list[int], server_round: int, experiment_config : dict = None) :
     """
     Send messages to the specified node ids and wait for all results using the Flower Message API.
     N.b. this is not a predefined flower function, but a custom function implemented for this app.
 
     Parameters
     ----------
+    message_type : MessageType
+        The type of the message to be sent. It can be one of the following : EVALUATE, QUERY, and  TRAIN.
+        Based on the type used, a different method will be called in the client.
     grid : Grid
         The Flower Grid instance.
         See https://flower.ai/docs/framework/ref-api/flwr.serverapp.Grid.html for more details.
     node_ids : list[int]
         List of node ids to which send the messages.
-    server_round : int
+    experiment_config : int
         The current server round.
     my_config : dict, optional
         Dictionary containing personal configuration to be sent to the clients, by default None.
@@ -95,13 +107,13 @@ def send_and_receive_data_through_query(grid: Grid, node_ids: list[int], server_
     recorddict = RecordDict()
 
     # Add personal configuration to message
-    if my_config is not None : recorddict['my_config'] = ConfigRecord(my_config)
+    if experiment_config is not None : recorddict['experiment_config'] = ConfigRecord(experiment_config)
     # recorddict['my_config'] = ConfigRecord(my_config if my_config is not None else {})
 
     for node_id in node_ids:  # one message for each node
         message = Message(
             content = recorddict,
-            message_type = MessageType.QUERY,
+            message_type = message_type,
             dst_node_id = node_id,
             group_id = str(server_round),
         )
@@ -109,7 +121,7 @@ def send_and_receive_data_through_query(grid: Grid, node_ids: list[int], server_
         messages.append(message)
 
         # Some notes about the Message class
-        # The message_type can be one of the following : EVALUATE, QUERY, SYSTEM, TRAIN. Based on the type used, a different method will be called in the client.
+        # The message_type can be one of the following : EVALUATE, QUERY, and  TRAIN. Based on the type used, a different method will be called in the client. (In past, I also write in this comment that exist SYSTEM message type but I think it was an error on my side)
         # In this case we use QUERY, so the `query` method in ClientApp will be called (With the decorator implementation, it is the function decorated with @app.query).
         # The group_id is used to group messages. In some settings, this is used as the federated learning round.
         # From flower documentation : "The ID of the group to which this message is associated. In some settings, this is used as the federated learning round"
@@ -125,7 +137,7 @@ def send_and_receive_data_through_query(grid: Grid, node_ids: list[int], server_
 
     return replies
 
-def get_data_from_clients_through_query(grid: Grid, node_ids : list[int], my_config : dict = None, max_number_of_attempts : int = 10) -> list[Message]:
+def get_data_from_clients(message_type : MessageType, grid: Grid, node_ids : list[int], experiment_config : dict = None, max_number_of_attempts : int = 10, sleep_time : int = 2) -> list[Message]:
     """
     Use the function `send_and_receive_data_through_query` to send messages to the clients and receive their results.
     If an error occurs, the function will retry until the maximum number of attempts is reached.
@@ -133,16 +145,22 @@ def get_data_from_clients_through_query(grid: Grid, node_ids : list[int], my_con
     N.b. this is not a predefined flower function, but a custom function implemented for this app.
 
     Parameters
+    ----------
+    message_type : MessageType
+        The type of the message to be sent. It can be one of the following : EVALUATE, QUERY, and  TRAIN.
+        Based on the type used, a different method will be called in the client.
     grid : Grid
         The Flower Grid instance.
         See https://flower.ai/docs/framework/ref-api/flwr.serverapp.Grid.html for more details.
     node_ids : list[int]
         List of node ids to which send the messages.
-    my_config : dict, optional
+    experiment_config : dict, optional
         Dictionary containing personal configuration to be sent to the clients, by default None.
         If None, an empty dictionary will be sent.
     max_number_of_attempts : int, optional
         Maximum number of attempts to send the messages and receive the results, by default 10.
+    sleep_time : int, optional
+        Time to wait between complete attempts, expressed in seconds. By default 2 seconds.
 
     Returns
     -------
@@ -153,7 +171,7 @@ def get_data_from_clients_through_query(grid: Grid, node_ids : list[int], my_con
 
     n_attempts = 0
     while (True) :
-        results = send_and_receive_data_through_query(grid, node_ids, server_round = 0, my_config = my_config)
+        results = send_and_receive_data(message_type, grid, node_ids, server_round = 0, experiment_config = experiment_config)
 
         if results is not None :
             # If no error, break the loop
@@ -162,7 +180,7 @@ def get_data_from_clients_through_query(grid: Grid, node_ids : list[int], my_con
             n_attempts += 1
             log(INFO, f"Error in receiving data from clients. Attempt {n_attempts}/{max_number_of_attempts}")
             if n_attempts >= max_number_of_attempts :
-                raise Exception(f"Error in receiving data from clients during round {my_config['server_round']}. Maximum number of attempts ({max_number_of_attempts}) reached")
-            time.sleep(2)
+                raise Exception(f"Error in receiving data from clients during round {experiment_config['server_round']}. Maximum number of attempts ({max_number_of_attempts}) reached")
+            time.sleep(sleep_time)
 
     return results
