@@ -1,8 +1,0 @@
-modality = 'synthetic'
-seed  = 42
-distribution = 'normal'
-size_1D_array = 100
-
-# Parameters for normal distribution
-loc = 0
-scale = 1

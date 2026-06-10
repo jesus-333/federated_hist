@@ -39,11 +39,25 @@ def other_script_path(name : str) -> pathlib.Path:
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-def get_debug_config(app_name : str) -> dict :
-
+def get_debug_config_app(app_name : str) -> dict :
+    
+    # Note that DEBUG_CONFIG_PATH is a dictionary defined in the __init__.py file of this config module, which maps app names to the paths of their respective debug configuration files.
     print(DEBUG_CONFIG_PATH)
+
     template_path = DEBUG_CONFIG_PATH[app_name]
 
-    debug_config = toml.load(template_path)
+    debug_config_app = toml.load(template_path)
 
-    return debug_config
+    return debug_config_app
+
+def get_debug_config_data_connector(data_type : str) -> dict :
+    print(DEBUG_CONFIG_PATH)
+
+    template_path = DEBUG_CONFIG_PATH[data_type]
+
+    debug_config_data_connector = toml.load(template_path)
+
+    return debug_config_data_connector
+
+    # I know. This function is identical to the previous one. 
+    # But I prefer to have it separated for now, in case I want to add some data-connector-specific processing in the future.

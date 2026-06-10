@@ -30,21 +30,21 @@ class synthetic_connector_config(connector_config):
         Always set to 'synthetic'.
     distribution : Literal['normal', 'uniform']
         Type of distribution for synthetic data. Default is 'normal'.
-    size : int
-        Number of samples to generate. Default is 100.
+    size : tuple | list
+        Size of the generated data. Default is (1000, 20), i.e. 1000 samples with 20 features.
     seed : int
         Random seed for reproducibility. Default is 42.
     
     Examples
     --------
-    >>> config = synthetic_connector_config(distribution='normal', size=300, seed=123)
+    >>> config = synthetic_connector_config(distribution = 'normal', size = (782, 33), seed = 123)
     """
     
     # General parameters
     modality: str = 'synthetic'
     seed : int = 42
     distribution: Literal['normal', 'uniform'] = 'normal'
-    size_1D_array : int = 100
+    size : list | tuple = (1000, 20)
 
     # Parameters for normal distribution
     loc: float = 0
@@ -62,7 +62,7 @@ class synthetic_connector_config(connector_config):
         config = dict(
             modality = self.modality,
             distribution = self.distribution,
-            size = self.size_1D_array,
+            size = self.size,
             seed = self.seed,
             # Parameters for normal distribution
             loc = self.loc if self.distribution == 'normal' else None,
@@ -83,7 +83,7 @@ class synthetic_connector_config(connector_config):
         return cls(
             modality      = config_dict.get('modality', 'synthetic'),
             distribution  = config_dict.get('distribution', 'normal'),
-            size_1D_array = config_dict.get('size', 100),
+            size          = config_dict.get('size', (1000, 20)),
             seed          = config_dict.get('seed', 42),
             # Parameters for normal distribution
             loc           = config_dict.get('loc', 0),
