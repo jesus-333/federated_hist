@@ -32,32 +32,32 @@ def main_hist(args, flwr_args) -> None:
     num_supernodes = 7
 
     if args.debug :
-        path_server_config = write_debug_config(num_supernodes, "flower_hist",)
-        print(f"Debug mode enabled. A copy of the config used is saved at : {path_server_config}")
+        path_app_config = write_debug_config(num_supernodes, "flower_hist",)
+        print(f"Debug mode enabled. A copy of the config used is saved at : {path_app_config}")
     elif args.config_file is None :
-        path_server_config = "./config/hist.toml"
-        print(f"No configuration file provided. Using the default one: {path_server_config}")
+        path_app_config = "./config/hist.toml"
+        print(f"No configuration file provided. Using the default one: {path_app_config}")
     else :
-        path_server_config = args.config_file
+        path_app_config = args.config_file
     
     # Check if arguments are valid
-    if not Path(path_server_config).is_file() : # Check if the provided configuration file exists
-        print(f"Error: The provided configuration file does not exist: {path_server_config}")
+    if not Path(path_app_config).is_file() : # Check if the provided configuration file exists
+        print(f"Error: The provided configuration file does not exist: {path_app_config}")
         sys.exit(1)
-    if Path(path_server_config).suffix != ".toml" : # Check if the provided configuration file is a toml file
-        print(f"Error: The provided configuration file is not a toml file: {path_server_config}")
+    if Path(path_app_config).suffix != ".toml" : # Check if the provided configuration file is a toml file
+        print(f"Error: The provided configuration file is not a toml file: {path_app_config}")
         sys.exit(1)
 
     # ***************************************
     # Check if the provided configuration file is valid
     
-    config = toml.load(path_server_config)
+    config = toml.load(path_app_config)
 
     if 'app' not in config or config['app'] != 'flower_hist' :
-        print(f"Error: The provided configuration file does not contain a valid 'app = \"flower_hist\"' entry: {path_server_config}")
+        print(f"Error: The provided configuration file does not contain a valid 'app = \"flower_hist\"' entry: {path_app_config}")
         sys.exit(1)
     # if 'flower_hist_config' not in config :
-    #     print(f"Error: The provided configuration file does not contain the 'flower_hist_config' section: {path_server_config}")
+    #     print(f"Error: The provided configuration file does not contain the 'flower_hist_config' section: {path_app_config}")
     #     sys.exit(1)
 
     # ***************************************
@@ -69,8 +69,8 @@ def main_hist(args, flwr_args) -> None:
     elif args.debug :
         command += ["--federation", "@none/default", "--stream", "--federation-config", f"num-supernodes={num_supernodes}"]
 
-    command += ["--run-config", f"app='flower_hist' path_server_config='{path_server_config}'"]
-    # command += ["--run-config", f"{path_server_config}"]
+    command += ["--run-config", f"app='flower_hist' path_app_config='{path_app_config}'"]
+    # command += ["--run-config", f"{path_app_config}"]
     command += flwr_args
     
     if args.debug : print(f"Running command: {' '.join(command)}")
