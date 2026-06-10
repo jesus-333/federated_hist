@@ -21,6 +21,7 @@ from flwr.common import Context, Message
 # Internal imports
 from clinnova_fl.data_connector.generic import data_connector
 from clinnova_fl.config.connector import generic
+from clinnova_fl.dataset import EXISTING_DATASTE_TYPE
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -95,15 +96,48 @@ def get_dataset(experiment_config : dict, node_config : dict) -> dataset :
 
     # Get the id of the datset you want to use
     dataset_id = experiment_config['dataset_id']
+    
+    # Get dataset information
+    dataset_connector_config_file_path = node_config[dataset_id]['dataset_connector_config_file_path']
+    dataset_type = node_config[dataset_id]['dataset_types']
+    
+    # Check if the dataset type is supported
+    if dataset_type not in EXISTING_DATASTE_TYPE : raise ValueError(f"Dataset type {dataset_type} is not supported. Supported dataset types are: {EXISTING_DATASTE_TYPE}")
 
-    # Get the path to the toml file containing the configuration for the data connector of the dataset and load it
-    data_connector_config_path = node_config['dataset_connectors'][dataset_id]
-    data_connector_config_dict = toml.load(data_connector_config_path)
+    # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    # Get the data connector
+
+    # Load the data connector configuration from the toml file
+    data_connector_config_dict = toml.load(dataset_connector_config_file_path)
 
     # Convert the dictionary to a data connector configuration object
     data_connector_config = generic.get_connector_config(data_connector_config_dict)
 
-    # Get the data connector 
+    # Create the data connector
     data_connector = generic.get_connector(data_connector_config)
 
+    # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    # Create the dataset
+    
+    dataset_class = get_dataset_class(dataset_type)
+    dataset_istance = dataset_class(dataset_id = dataset_id, data_connector = data_connector)
 
+    return dataset_istance
+
+
+def get_dataset_class(dataset_type : str) -> dataset :
+    """
+    Get the dataset class for a specific dataset type. Keep as a separat function so it's easier to maintain and update the supported dataset types.
+
+    Parameters
+    ----------
+    dataset_type : str
+        The type of the dataset (e.g., 'tabular', 'images', etc.). Supported dataset types are defined in the EXISTING_DATASTE_TYPE list in the clinnova_fl.dataset.__init__.py module.
+    """
+
+    if dataset_type == "tabular" :
+        from clinnova_fl.dataset.tabular import dataset as dataset_class
+    elif dataset_type == "images" :
+        from clinnova_fl.dataset.images import dataset as dataset_class
+
+    return dataset_class

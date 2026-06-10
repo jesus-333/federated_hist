@@ -55,16 +55,16 @@ class data_connector(generic_data_connector):
         np.random.seed(self.config.seed)
 
         if self.config.distribution == 'normal':
-            self.data = np.random.normal(loc = self.config.loc, scale = self.config.scale, size = self.config.shape)
+            self.data = np.random.normal(loc = self.config.loc, scale = self.config.scale, size = self.config.size)
         elif self.config.distribution == 'uniform':
-            self.data = np.random.uniform(low = self.config.low, high = self.config.high, size = self.config.shape)
+            self.data = np.random.uniform(low = self.config.low, high = self.config.high, size = self.config.size)
         else:
             raise ValueError(f"Distribution '{self.config.distribution}' not supported.")
         
         # Create preferix for the feature names. Use feature_1, feature_2, ..., feature_n for n features.
-        if len(self.config.shape) == 2 :
+        if len(self.config.size) == 2 :
             # Note that features make sense only if the data is 2D.
-            self.features = [f"feature_{i + 1}" for i in range(self.config.shape[1])]
+            self.features = [f"feature_{i + 1}" for i in range(self.config.size[1])]
         else :
             self.features = None
 

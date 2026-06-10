@@ -10,3 +10,7 @@ Alberto Zancanaro <alberto.zancanaro@uni.lu>
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+EXISTING_DATASTE_TYPE = [
+    "images",
+    "tabular",
+]

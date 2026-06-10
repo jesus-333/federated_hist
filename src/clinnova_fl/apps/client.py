@@ -132,7 +132,7 @@ def get_experiment_and_node_config(msg : Message, context : Context) -> tuple[di
 
     # Get the node config (used for data connector and dataset creation)
     if experiment_config['simulation'] :
-        node_config = get_simulated_node_config()
+        node_config = get_simulated_node_config(context, experiment_config)
     elif experiment_config['run_with_nvflare'] :
         node_config = get_nvflare_node_config()
     else :
@@ -150,10 +150,28 @@ def get_experiment_and_node_config(msg : Message, context : Context) -> tuple[di
     # So I can customize it only if I created directly the supernode with the flower-supernode command
     # For an example see https://flower.ai/docs/framework/how-to-run-flower-with-deployment-engine.html#start-two-flower-supernodes
 
-# TEMPORARY. TO BE REMOVED ONCE THE SIMULATION AND NVFLARE CONFIGS ARE DEFINED.
-# Added only to remove the error 
-def get_simulated_node_config() -> dict :
-    return dict()
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# The position of these two functions could be modified in the future
+
+def get_simulated_node_config(context : Context, experiment_config : dict) -> dict :
+    """
+    Create a "fake" node_config dictionary used for simulation. 
+    In case of simulation I expect that the experiment config also contains the path for the simulated nodes configuration file.
+
+    For now the function is simple but I prefer to keep it as a separate function in case I need to update it in the future.
+    """
+    
+    # Get node id
+    node_id = context.run_config
+    
+    # Get the path for the node config and load it
+    # TODO Convert to Path object
+    path_node_config = experiment_config['paths_nodes_config'][node_id]
+
+    # Load the config
+    node_config = toml.load(path_node_config)
+
+    return node_config
 
 def get_nvflare_node_config() -> dict :
     return dict()
