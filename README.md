@@ -24,20 +24,28 @@ When the flag `--run_config` is used all the entries specified after the flag ov
 By design, however, it is not possible to use this flag to pass config options that are not already present in the file.
 So any options you want to add in run config MUST also be present in `pyproject` in the `tool.flwr.app.config` section.
 
-To keep things simple, at present, `run_config` should only have 3 inputs :
+To keep things simple, at present, `run_config` should  have 3 necessary inputs (+2 extras) :
 - `app` is the name of the app you want to run.
 - `path_app_config` is the path to a `toml` file with all the config for the app you want to run.
-- `path_data_connectorconfig` is the path to a `toml` file with all the config for the data connector.
+- `dataset_id` is the id of the dataset you want to use for the experiment
+- `simulation` is a boolean value and is one of the extra inputs. It is an extra flag used to indicate when I run the experiment in simulation mode.
+- `run_with_nvflare` is a boolean value and is one of the extra inputs. It is a flag used to indicate if the app is executed through the NVFlare framework.
 This allows me to keep the `pyproject.toml` file cleaner (only package related configurations, or flower settings) and any configuration related to scientific things is in dedicated files.
 
-When an app is launched, the server read the `run_config` and load the two config files. After that they are saved in a single dictionary called `experiment_config` with the following structure :
+When an app is launched, the server read the `run_config` and load the config file. After that, the config, together with the dataset to use and the app name are stored in a dictionary called `experiment_config`
+<!-- After that they are saved in a single dictionary called `experiment_config` with the following structure : -->
+
 ```python
 experiment_config = dict(
     app = "x", # App name
-    app_config = dict( ... ) # Config for the app x, load by the toml file specified by path_app_config
-    data_connector_config = dict( ... ) # Config for the data connector, loaded from the toml file specified by path_data_connectorconfig
+    app_config = dict( ... ), # Config for the app x, load by the toml file specified by path_app_config
+    dataset_id = 'Population_1234',
+    simulation = False,
+    run_with_nvflare = False
 )
 ```
+
+This `experiment_config` is then used by all the app (both server/client).
 
 
 ## To delete in future
@@ -53,3 +61,7 @@ pkill -f flower-superlink
 FLWR_LOG_LEVEL=DEBUG flower-superlink --insecure --simulation
 ```
 Then in another terminal run `flwr run .`
+
+### NVFlare and Flower node config
+
+See [here](https://github.com/NVIDIA/NVFlare/blob/51f9a59f8e7292ff57d1edb985a02176afde7d19/nvflare/app_opt/flower/applet.py#L227-L240) to see how flare create the custom node config
