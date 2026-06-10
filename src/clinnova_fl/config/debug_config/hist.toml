@@ -1,7 +1,7 @@
 app = "flower_hist"
 dataset_id = 'synth_1'
 
-[flower_hist_config]
+# App specific config
 max_number_of_attempts = 10
 n_bins = 10
 bins_variable = "feature_0"

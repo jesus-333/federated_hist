@@ -29,8 +29,10 @@ def main_hist(args, flwr_args) -> None:
     # ***************************************
     # Check if arguments are passed
 
+    num_supernodes = 7
+
     if args.debug :
-        path_server_config = write_debug_config("flower_hist")
+        path_server_config = write_debug_config(num_supernodes, "flower_hist",)
         print(f"Debug mode enabled. A copy of the config used is saved at : {path_server_config}")
     elif args.config_file is None :
         path_server_config = "./config/hist.toml"
@@ -54,9 +56,9 @@ def main_hist(args, flwr_args) -> None:
     if 'app' not in config or config['app'] != 'flower_hist' :
         print(f"Error: The provided configuration file does not contain a valid 'app = \"flower_hist\"' entry: {path_server_config}")
         sys.exit(1)
-    if 'flower_hist_config' not in config :
-        print(f"Error: The provided configuration file does not contain the 'flower_hist_config' section: {path_server_config}")
-        sys.exit(1)
+    # if 'flower_hist_config' not in config :
+    #     print(f"Error: The provided configuration file does not contain the 'flower_hist_config' section: {path_server_config}")
+    #     sys.exit(1)
 
     # ***************************************
 
@@ -65,7 +67,7 @@ def main_hist(args, flwr_args) -> None:
     if args.simulation :
         command += ["--federation", "@none/default", "--stream"]
     elif args.debug :
-        command += ["--federation", "@none/default", "--stream", "--federation-config", "num-supernodes=7"]
+        command += ["--federation", "@none/default", "--stream", "--federation-config", f"num-supernodes={num_supernodes}"]
 
     command += ["--run-config", f"app='flower_hist' path_server_config='{path_server_config}'"]
     # command += ["--run-config", f"{path_server_config}"]

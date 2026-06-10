@@ -78,9 +78,13 @@ def write_debug_config(n_clients : int, app_name : str) -> pathlib.Path:
     # Get path for the template of the synthetic debug data connector config 
     debug_config_data_connector = config.get_debug_config_data_connector('synthetic')
 
+    import pprint
+    pprint.pprint(debug_config_app)
+
+    required_dataset_type = debug_config_app['required_dataset_type']
+
     # Save debug config in the new folder (Dataset and data_connector)
     for i in range(n_clients) :
-        required_dataset_type = debug_config_app['required_dataset_type']
         
         # Change the mean of the generated distribution
         debug_config_data_connector['loc'] = i
@@ -89,7 +93,7 @@ def write_debug_config(n_clients : int, app_name : str) -> pathlib.Path:
         debug_config_data_connector['size'] = debug_config_data_connector['data_size_based_on_dataset_type'][required_dataset_type]
 
         # Save the debug config for the data connector of the current client
-        path_debug_config_data_connector = debug_dir / f"synt_1_node_{i}.toml"
+        path_debug_config_data_connector = debug_dir / f"synth_1_node_{i}.toml"
         with path_debug_config_data_connector.open("w", encoding = "utf-8") as f : toml.dump(debug_config_data_connector, f)
 
         # Create the node config for the current client, which specifies the path to the data connector debug config

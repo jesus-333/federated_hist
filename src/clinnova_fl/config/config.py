@@ -7,6 +7,7 @@ Decide if keeping this file or not.
 from __future__ import annotations
 
 import pathlib
+import pprint
 import toml
 
 from clinnova_fl.config import DEBUG_CONFIG_PATH
@@ -42,7 +43,7 @@ def other_script_path(name : str) -> pathlib.Path:
 def get_debug_config_app(app_name : str) -> dict :
     
     # Note that DEBUG_CONFIG_PATH is a dictionary defined in the __init__.py file of this config module, which maps app names to the paths of their respective debug configuration files.
-    print(DEBUG_CONFIG_PATH)
+    pprint.pprint(DEBUG_CONFIG_PATH)
 
     template_path = DEBUG_CONFIG_PATH[app_name]
 
@@ -51,7 +52,7 @@ def get_debug_config_app(app_name : str) -> dict :
     return debug_config_app
 
 def get_debug_config_data_connector(data_type : str) -> dict :
-    print(DEBUG_CONFIG_PATH)
+    pprint.pprint(DEBUG_CONFIG_PATH)
 
     template_path = DEBUG_CONFIG_PATH[data_type]
 
