@@ -33,10 +33,10 @@ def evaluate(msg : Message, context : Context) :
     """
     
     # Get the experiment and node configuration
-    experiment_config, node_config = get_experiment_and_node_config(msg, context)
+    custom_config, node_config = get_experiment_and_node_config(msg, context)
 
     # Get the data connector
-    data_connector = generic.get_dataset(experiment_config, node_config)
+    data_connector = generic.get_dataset(custom_config, node_config)
 
     # Get the evaluation function for the specified app
     if context.run_config["app"] == "flower_hist" :
@@ -65,10 +65,10 @@ def query(msg : Message, context : Context) :
     print("BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB")
 
     # Get the experiment and node configuration
-    experiment_config, node_config = get_experiment_and_node_config(msg, context)
+    custom_config, node_config = get_experiment_and_node_config(msg, context)
 
     # Get the data connector
-    data_connector = generic.get_dataset(experiment_config, node_config)
+    data_connector = generic.get_dataset(custom_config, node_config)
     
     # Get the query function for the specified app
     if context.run_config["app"] == "flower_hist" :
@@ -89,10 +89,10 @@ def train(msg : Message, context : Context) :
     """
 
     # Get the experiment and node configuration
-    experiment_config, node_config = get_experiment_and_node_config(msg, context)
+    custom_config, node_config = get_experiment_and_node_config(msg, context)
 
     # Get the data connector
-    data_connector = generic.get_dataset(experiment_config, node_config)
+    data_connector = generic.get_dataset(custom_config, node_config)
 
     # Get the training function for the speciefied app
     if context.run_config["app"] == "flower_hist" :
@@ -121,24 +121,25 @@ def get_experiment_and_node_config(msg : Message, context : Context) -> tuple[di
 
     Returns
     -------
-    experiment_config : dict
-        The experiment configuration extracted from the message content.
+    custom_config : dict
+        The custom configuration extracted from the message content.
+        For more information about the custom_config, see the docstring of the :func:`~clinnova_fl.apps.support_fl.send_and_receive_data` and :func:`~clinnova_fl.apps.support_fl.get_data_from_clients` functions in :mod:`~clinnova_fl.apps.support_fl`.
     node_config : dict
         The node configuration, later used by the function get_dataset to create the data connector and the dataset.
     """
 
     # Get all the experiment config (from the message)
-    experiment_config = msg.content.config_records["experiment_config"]
+    custom_config = msg.content.config_records["custom_config"] if "custom_config" in msg.content.config_records else dict()
 
     # Get the node config (used for data connector and dataset creation)
-    if experiment_config['simulation'] :
-        node_config = get_simulated_node_config(context, experiment_config)
-    elif experiment_config['run_with_nvflare'] :
-        node_config = get_nvflare_node_config()
+    if 'simulation' in custom_config :
+        node_config = get_simulated_node_config(context, custom_config) if custom_config['simulation'] else dict()
+    elif 'run_with_nvflare' in custom_config :
+        node_config = get_nvflare_node_config() if custom_config['run_with_nvflare'] else dict()
     else :
         node_config = context.node_config
 
-    return experiment_config, node_config
+    return custom_config, node_config
 
     # Note on context.node_config
     # Note that (at the time of writing 02/06/2026) the context.node_config can have custom values only if I created directly the supernode with the flower-supernode command, passing the custom node config as an argument of the command.
@@ -153,7 +154,7 @@ def get_experiment_and_node_config(msg : Message, context : Context) -> tuple[di
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # The position of these two functions could be modified in the future
 
-def get_simulated_node_config(context : Context, experiment_config : dict) -> dict :
+def get_simulated_node_config(context : Context, custom_config : dict) -> dict :
     """
     Create a "fake" node_config dictionary used for simulation. 
     In case of simulation I expect that the experiment config also contains the path for the simulated nodes configuration file.
@@ -162,11 +163,25 @@ def get_simulated_node_config(context : Context, experiment_config : dict) -> di
     """
     
     # Get node id
-    node_id = context.run_config
+    import pprint
+    pprint.pprint(context)
+    node_id = context.node_config['partition-id']
+
+    if 'paths_nodes_config' not in custom_config :
+        error_message = ""
+        error_message += "ERROR : paths_nodes_config key is missing the the dictionary received in the client."
+        error_message += f"\nCurrently, the keys in the dictionary are : {"\n- " + "\n- ".join(custom_config.keys())}"
+        error_message += "\nThis key is required to run the app in simulation mode, as it contains the paths for the node configuration files."
+        raise ValueError(error_message)
+
+    print("QUESTO CUSTOM CONFIG ")
+    pprint.pprint(custom_config)
+    print("QUESTO e' CONTEXT")
+    pprint.pprint(context )
     
     # Get the path for the node config and load it
     # TODO Convert to Path object
-    path_node_config = experiment_config['paths_nodes_config'][node_id]
+    path_node_config = custom_config['paths_nodes_config'][node_id]
 
     # Load the config
     node_config = toml.load(path_node_config)
@@ -175,3 +190,4 @@ def get_simulated_node_config(context : Context, experiment_config : dict) -> di
 
 def get_nvflare_node_config() -> dict :
     return dict()
+

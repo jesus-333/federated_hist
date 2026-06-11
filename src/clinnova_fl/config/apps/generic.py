@@ -175,19 +175,10 @@ class app_config(ABC):
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-def get_connector_config(connector_config_dict : dict) :
-    """
-    Based on the config dictionary received, return the appropriate connector config.
+def get_app_config(connector_config_dict : dict) :
     """
 
-    modality = connector_config_dict['modality']
-
-    if modality == 'csv' :
-        connector_config = connector_config_dataclass.csv.csv_connector_config.from_dict(connector_config_dict)
-    else :
-        raise ValueError(f'Modality {modality} not supported. Currently supported modalities are: {SUPPORTED_MODALITY}')
-
-    return connector_config
+    """
 
 
 

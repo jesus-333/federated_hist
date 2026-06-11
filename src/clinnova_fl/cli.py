@@ -78,8 +78,8 @@ def write_debug_config(n_clients : int, app_name : str) -> pathlib.Path:
     # Get path for the template of the synthetic debug data connector config 
     debug_config_data_connector = config.get_debug_config_data_connector('synthetic')
 
-    import pprint
-    pprint.pprint(debug_config_app)
+    # import pprint
+    # pprint.pprint(debug_config_app)
 
     required_dataset_type = debug_config_app['required_dataset_type']
 

@@ -75,14 +75,14 @@ def query(msg : Message, context : Context, data_connector : data_connector):
     """
 
     # Get config (from the message)
-    my_config = msg.content.config_records["my_config"]
+    my_config = msg.content.config_records["custom_config"]
 
     # Histogram parameters
     server_round  = my_config["server_round"]
     bins_variable = my_config["bins_variable"]
     
     # Get the dataset
-    data_to_calculate_hist = data_connector.get_data_array()
+    data_to_calculate_hist = data_connector.get_feature(bins_variable)
     
     # Variable to store the results of the query
     query_results = {}

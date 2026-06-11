@@ -21,7 +21,6 @@ import toml
 # The abstract methods defined in the ABC must be implemented by any concrete subclass.
 # abstractmethod provide a decorator to indicate methods that must be implemented by subclasses. If a subclass does not implement all abstract methods, it cannot be instantiated.
 
-import clinnova_fl.config.connector as connector_config_dataclass
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -182,15 +181,12 @@ def get_connector_config(connector_config_dict : dict) :
     modality = connector_config_dict['modality']
 
     if modality == 'csv' :
-        connector_config = connector_config_dataclass.csv.csv_connector_config.from_dict(connector_config_dict)
+        from clinnova_fl.config.connector.csv import csv_connector_config
+        connector_config = csv_connector_config.from_dict(connector_config_dict)
     elif modality == 'synthetic' :
-        connector_config = connector_config_dataclass.synthetic.synthetic_connector_config.from_dict(connector_config_dict)
+        from clinnova_fl.config.connector.synthetic import synthetic_connector_config
+        connector_config = synthetic_connector_config.from_dict(connector_config_dict)
     else :
         raise ValueError(f'Modality {modality} not supported. Currently supported modalities are: {SUPPORTED_MODALITY}')
 
     return connector_config
-
-
-
-
-

@@ -19,8 +19,8 @@ import toml
 from flwr.common import Context, Message
 
 # Internal imports
-from clinnova_fl.data_connector.generic import data_connector
-from clinnova_fl.config.connector import generic
+from clinnova_fl.data_connector import generic as generic_data_connector
+from clinnova_fl.config.connector import generic as generic_config
 from clinnova_fl.dataset import EXISTING_DATASTE_TYPE
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -32,7 +32,7 @@ class dataset(ABC):
 
     # Note : Implementing the __get_item__ and __len__ methods allows to use the dataset with a torch DataLoader, which is a common pattern in PyTorch for loading data in batches.
 
-    def __init__(self, dataset_id : str, data_connector : data_connector) :
+    def __init__(self, dataset_id : str, data_connector : generic_data_connector.data_connector) :
         """
         Initialize the generic data connector with a configuration.
         
@@ -111,16 +111,16 @@ def get_dataset(experiment_config : dict, node_config : dict) -> dataset :
     data_connector_config_dict = toml.load(dataset_connector_config_file_path)
 
     # Convert the dictionary to a data connector configuration object
-    data_connector_config = generic.get_connector_config(data_connector_config_dict)
+    data_connector_config = generic_config.get_connector_config(data_connector_config_dict)
 
     # Create the data connector
-    data_connector = generic.get_connector(data_connector_config)
+    data_connector_object = generic_data_connector.get_connector(data_connector_config)
 
     # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     # Create the dataset
     
     dataset_class = get_dataset_class(dataset_type)
-    dataset_istance = dataset_class(dataset_id = dataset_id, data_connector = data_connector)
+    dataset_istance = dataset_class(dataset_id = dataset_id, data_connector = data_connector_object)
 
     return dataset_istance
 

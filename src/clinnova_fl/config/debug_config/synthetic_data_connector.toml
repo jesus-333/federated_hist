@@ -10,4 +10,4 @@ scale = 1
 # Extra options used only for debug, i.e. codify the size of the dataset based on the dataset type (table, image, text, etc.)
 # This option should not be present in a classic synthetic configuration file. They are added here only for debug purposes.
 [data_size_based_on_dataset_type] 
-table = [500, 20]
+tabular = [500, 20]

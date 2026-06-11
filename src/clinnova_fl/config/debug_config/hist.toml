@@ -4,11 +4,11 @@ dataset_id = 'synth_1'
 # App specific config
 max_number_of_attempts = 10
 n_bins = 10
-bins_variable = "feature_0"
+bins_variable = "feature_1"
 bins_distribution = "uniform"
 path_to_save = "./results/"
 debug = true
 
 # Config used only for debug
 seed = 42
-required_dataset_type = "table"
+required_dataset_type = "tabular"

@@ -64,10 +64,12 @@ def main_hist(args, flwr_args) -> None:
 
     command = ["flwr", "run", "."]
 
-    if args.simulation :
-        command += ["--federation", "@none/default", "--stream"]
-    elif args.debug :
-        command += ["--federation", "@none/default", "--stream", "--federation-config", f"num-supernodes={num_supernodes}"]
+    if args.simulation or args.debug :
+        # Add custom flag for simulation/debug
+        command += ["--federation", "@none/default", "--stream", "--run-config", "simulation='true'"]
+
+        # In case of debug add also the number of supernodes
+        if args.debug : command += ["--federation-config", f"num-supernodes={num_supernodes}"]
 
     command += ["--run-config", f"app='flower_hist' path_app_config='{path_app_config}'"]
     # command += ["--run-config", f"{path_app_config}"]

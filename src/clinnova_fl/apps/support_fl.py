@@ -71,7 +71,7 @@ def get_node_ids(grid: Grid, min_nodes: int, max_number_of_attempts : int = 10) 
 
     return all_node_ids
 
-def send_and_receive_data(message_type : MessageType, grid: Grid, node_ids: list[int], server_round: int, experiment_config : dict = None) :
+def send_and_receive_data(message_type : MessageType, grid: Grid, node_ids: list[int], server_round: int, custom_config : dict = None) :
     """
     Send messages to the specified node ids and wait for all results using the Flower Message API.
     N.b. this is not a predefined flower function, but a custom function implemented for this app.
@@ -86,8 +86,9 @@ def send_and_receive_data(message_type : MessageType, grid: Grid, node_ids: list
         See https://flower.ai/docs/framework/ref-api/flwr.serverapp.Grid.html for more details.
     node_ids : list[int]
         List of node ids to which send the messages.
-    experiment_config : int
-        The current server round.
+    custom_config : int
+        The custom configuration to be sent to the clients. If None is passed, no custom configuration will be sent. Default is None.
+        See the docstring of the `get_data_from_clients` function for more details about the custom configuration.
     my_config : dict, optional
         Dictionary containing personal configuration to be sent to the clients, by default None.
         If None, an empty dictionary will be sent.
@@ -107,7 +108,7 @@ def send_and_receive_data(message_type : MessageType, grid: Grid, node_ids: list
     recorddict = RecordDict()
 
     # Add personal configuration to message
-    if experiment_config is not None : recorddict['experiment_config'] = ConfigRecord(experiment_config)
+    if custom_config is not None : recorddict['custom_config'] = ConfigRecord(custom_config)
     # recorddict['my_config'] = ConfigRecord(my_config if my_config is not None else {})
 
     for node_id in node_ids:  # one message for each node
@@ -137,9 +138,9 @@ def send_and_receive_data(message_type : MessageType, grid: Grid, node_ids: list
 
     return replies
 
-def get_data_from_clients(message_type : MessageType, grid: Grid, node_ids : list[int], experiment_config : dict = None, max_number_of_attempts : int = 10, sleep_time : int = 2) -> list[Message]:
+def get_data_from_clients(message_type : MessageType, grid: Grid, node_ids : list[int], custom_config : dict = None, max_number_of_attempts : int = 10, sleep_time : int = 2) -> list[Message]:
     """
-    Use the function `send_and_receive_data_through_query` to send messages to the clients and receive their results.
+    Use the function `send_and_receive_data_through` to send messages to the clients and receive their results.
     If an error occurs, the function will retry until the maximum number of attempts is reached.
     Note that the function is "generic", in the sense that it can be used to send and receive any kind of data from the clients, granted that the data are in a format suitable for Flower messages.
     N.b. this is not a predefined flower function, but a custom function implemented for this app.
@@ -154,9 +155,10 @@ def get_data_from_clients(message_type : MessageType, grid: Grid, node_ids : lis
         See https://flower.ai/docs/framework/ref-api/flwr.serverapp.Grid.html for more details.
     node_ids : list[int]
         List of node ids to which send the messages.
-    experiment_config : dict, optional
-        Dictionary containing personal configuration to be sent to the clients, by default None.
-        If None, an empty dictionary will be sent.
+    custom_config : dict, optional
+        Dictionary containing personal configuration to be sent to the clients. By default None.
+        If it is not None, the custom dictionary will be sent to the clients as part of the message content, under the key "custom_config". The clients can access it with `msg.content.config_records["custom_config"]` (where msg is the Message object received by the client).
+        Note that if you pass a dictionary, not all datatype are supported by the Flower Message API. At the moment (06/26) the supported data types are : int | float | str | bytes | bool | list[int] | list[float] | list[str] | list[bytes] | list[bool]
     max_number_of_attempts : int, optional
         Maximum number of attempts to send the messages and receive the results, by default 10.
     sleep_time : int, optional
@@ -171,7 +173,7 @@ def get_data_from_clients(message_type : MessageType, grid: Grid, node_ids : lis
 
     n_attempts = 0
     while (True) :
-        results = send_and_receive_data(message_type, grid, node_ids, server_round = 0, experiment_config = experiment_config)
+        results = send_and_receive_data(message_type, grid, node_ids, server_round = 0, custom_config = custom_config)
 
         if results is not None :
             # If no error, break the loop
@@ -180,7 +182,18 @@ def get_data_from_clients(message_type : MessageType, grid: Grid, node_ids : lis
             n_attempts += 1
             log(INFO, f"Error in receiving data from clients. Attempt {n_attempts}/{max_number_of_attempts}")
             if n_attempts >= max_number_of_attempts :
-                raise Exception(f"Error in receiving data from clients during round {experiment_config['server_round']}. Maximum number of attempts ({max_number_of_attempts}) reached")
+                raise Exception(f"Error in receiving data from clients during round {n_attempts}. Maximum number of attempts ({max_number_of_attempts}) reached")
             time.sleep(sleep_time)
 
     return results
+
+def check_custom_config(custom_config : dict) :
+    """
+    Check that the custom configuration contains only supported data types.
+    """
+
+    supported_data_types = (int, float, str, bytes, bool, list[int], list[float], list[str], list[bytes], list[bool])
+    for key, value in custom_config.items() :
+        if not isinstance(value, supported_data_types) :
+            raise ValueError(f"Unsupported data type in custom configuration. Key: {key}, Value: {value}, Type of value: {type(value)}. Supported data types are {supported_data_types}")
+

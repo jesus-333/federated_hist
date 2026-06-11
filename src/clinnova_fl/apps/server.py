@@ -56,12 +56,15 @@ def main(grid: Grid, context: Context) -> None:
     # Load app config
     app_config = read_toml_config(Path(context.run_config["path_app_config"]))
 
+    # Update the app config with simulation flag
+    app_config['simulation'] = context.run_config['simulation']
+
     # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     # Check if dataset_id is specified in the app configuration. If not, raise an error.
     if "dataset_id" not in app_config : raise ValueError(f"Error: The provided app configuration file does not contain the 'dataset_id' key, which is required to run the an app. Currently, the options in the app config file are {list(app_config.keys())}.")
 
     # Load data connector config
-    dataset_id = read_toml_config(Path(app_config['dataset_id ']))
+    dataset_id = app_config['dataset_id']
 
     # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     # Prepare experiment config
@@ -70,7 +73,7 @@ def main(grid: Grid, context: Context) -> None:
         app = context.run_config["app"],
         app_config = app_config,
         dataset_id = dataset_id,
-        simulation = context.run_config['simulation']
+        simulation = context.run_config['simulation'] # I know it's redundant. Probably to remove in the future.
     )
 
     # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

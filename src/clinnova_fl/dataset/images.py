@@ -24,7 +24,7 @@ from clinnova_fl.dataset.generic import dataset
 
 class dataset(dataset):
     """
-    Tabular dataset implementation.
+    Image dataset implementation.
 
     Attributes
     ----------

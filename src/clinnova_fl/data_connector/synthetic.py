@@ -34,9 +34,7 @@ class data_connector(generic_data_connector):
     
     Examples
     --------
-    >>> config = synthetic_connector_config(distribution='normal', size=300, seed=123)
-    >>> connector = synthetic_data_connector(config)
-    >>> data = connector.get_data_array()
+    TODO
     """
     
     def __init__(self, config : synthetic_connector_config) -> None:
@@ -74,6 +72,13 @@ class data_connector(generic_data_connector):
         """
 
         return self.data[idx].to_numpy()
+
+    def __len__(self) -> int :
+        """
+        Return the number of samples
+        """
+
+        return self.data.shape[0]
 
     def get_feature(self, feature_name : str) -> np.ndarray :
         """
