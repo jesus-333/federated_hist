@@ -1,0 +1,26 @@
+[project]
+name = "hist-example-1"
+version = "1.0"
+description = "Example for the hist app "
+license = "Apache-2.0"
+authors = [
+    { name = "Alberto Zancanaro", email = "alberto.zancanaro@uni.lu" },
+]
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+[tool.flwr.app]
+publisher = "LCSB"
+
+[tool.flwr.app.components]
+serverapp = "app:server_app"
+clientapp = "app:client_app"
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+# Config for all flower apps
+
+[tool.flwr.app.config]
+app = "X"
+path_app_config = "X"
+dataset_id = "X"
+simulation = false
+run_with_nvflare = false
