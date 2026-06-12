@@ -115,15 +115,4 @@ def query(msg : Message, context : Context, data_connector : data_connector):
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-# def update_data_connector_config(my_config : dict, data_connector_config : connector.csv.csv_connector_config) :
-#     """
-#     Update the data_connector_config with the name of the variable on which you want to compute the histogram
-#     """
-#
-#     if data_connector_config.
-
-
-
-
-
 

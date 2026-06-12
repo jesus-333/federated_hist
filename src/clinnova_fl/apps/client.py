@@ -56,14 +56,6 @@ def query(msg : Message, context : Context) :
     Call the specific client-side query function based on the configuration received.
     """
 
-    print("DEBUG TO REMOVE. INSIDE THE SERVER")
-    print("BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB")
-    print(context)
-    import pprint
-    pprint.pprint(context)
-    pprint.pprint(msg)
-    print("BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB")
-
     # Get the experiment and node configuration
     custom_config, node_config = get_experiment_and_node_config(msg, context)
 

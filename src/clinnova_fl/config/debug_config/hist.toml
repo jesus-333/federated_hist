@@ -1,13 +1,14 @@
 app = "flower_hist"
 dataset_id = 'synth_1'
+debug = true
+max_number_of_attempts = 10
 
 # App specific config
-max_number_of_attempts = 10
 n_bins = 10
-bins_variable = "feature_1"
+bins_variable = "feature_0"
 bins_distribution = "uniform"
 path_to_save = "./results/"
-debug = true
+create_plot = false
 
 # Config used only for debug
 seed = 42
