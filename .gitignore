@@ -21,3 +21,5 @@ shared_app/results_hist_V1/variable_of_interest
 /debug/debug_flower_app/quickstart-pytorch
 /debug/
 /examples/fed_hist_1/debug
+/log.txt
+/src/clinnova_fl/apps/flower_ml_OLD
