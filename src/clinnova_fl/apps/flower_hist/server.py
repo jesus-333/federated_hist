@@ -25,16 +25,14 @@ import toml
 # Specific imports
 from collections.abc import Iterable
 from logging import INFO
-from pathlib import Path
 
 # Flower imports
-from flwr.common import Context, Message, MessageType, RecordDict, ConfigRecord
+from flwr.common import Context, Message, MessageType
 from flwr.common.logger import log
 from flwr.server import Grid
 
 # Internal imports
 from clinnova_fl.apps.support_fl import get_data_from_clients, get_node_ids
-from clinnova_fl.apps.flower_hist import support
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Flower ServerApp
