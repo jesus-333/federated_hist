@@ -15,9 +15,6 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 import toml
 
-# Flower imports
-from flwr.common import Context, Message
-
 # Internal imports
 from clinnova_fl.data_connector import generic as generic_data_connector
 from clinnova_fl.config.connector import generic as generic_config
@@ -28,6 +25,16 @@ from clinnova_fl.dataset import EXISTING_DATASTE_TYPE
 class dataset(ABC):
     """
     Abstract base class for all data the dataset.
+
+    Attributes
+    ----------
+    dataset_id : str
+        The unique identifier of the dataset.
+    data_connector : generic_data_connector.data_connector
+        The data connector used to retrieve the data for this dataset.
+    labels :
+        The labels of the samples in the dataset, if available. If the dataset does not have labels, this attribute should be set to None.
+        Note that if specified, it must be possible to retrieve the labels of the samples in the dataset using the same key used to retrieve the samples themselves (i.e. if I access to a sample with `self.data_connector[key]`, I should be able to access to the label of that sample with `self.labels[key]`).
     """
 
     # Note : Implementing the __get_item__ and __len__ methods allows to use the dataset with a torch DataLoader, which is a common pattern in PyTorch for loading data in batches.
@@ -44,6 +51,8 @@ class dataset(ABC):
 
         self.dataset_id = dataset_id
         self.data_connector = data_connector
+
+        self.labels = None
     
     def __get_item__(self, key) :
         """
@@ -55,7 +64,10 @@ class dataset(ABC):
                 The sample specified by the key. The specific format of the returned sample(s) depends on the implementation of the data connector and the dataset.
         """
 
-        return self.data_connector[key]
+        if self.labels is None :
+            return self.data_connector[key]
+        else :
+            return self.data_connector[key], self.labaels[key]
 
     def __len__(self) -> int :
         """
@@ -127,7 +139,7 @@ def get_dataset(experiment_config : dict, node_config : dict) -> dataset :
 
 def get_dataset_class(dataset_type : str) -> dataset :
     """
-    Get the dataset class for a specific dataset type. Keep as a separat function so it's easier to maintain and update the supported dataset types.
+    Get the dataset class for a specific dataset type. Keep as a separate function so it's easier to maintain and update the supported dataset types.
 
     Parameters
     ----------

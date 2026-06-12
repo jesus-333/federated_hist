@@ -1,4 +1,7 @@
 """
+
+TO REWRITE 
+
 CSV connector configuration, used to read data from csv file
 
 Authors

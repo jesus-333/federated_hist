@@ -66,14 +66,26 @@ class dataset(dataset):
                 The row(s) specified by row_idx. The specific format of the returned sample(s) depends on the return_type specified during the initialization of the dataset.
                 If return_type is 'numpy', the returned sample(s) will be in the form of a numpy array, if return_type is 'torch', the returned sample(s) will be in the form of a torch tensor, etc.
                 To see the supported return types for this dataset, you can use the show_supported_return_types() method.
+        label(s) 
+                The label(s) corresponding to the row(s) specified by row_idx, if available. If the dataset does not have labels, this will be None.
+                The specific format of the returned label(s) depends on the return_type specified during the initialization of the dataset, and is the same as for the sample(s).
+                This is an OPTIONAL return value. It will be returned only if the dataset has labels (i.e., if self.labels is not None). If the dataset does not have labels, this will be None.
         """
 
         sample = self.data_connector[row_idx]
+        label = self.labels[row_idx] if self.labels is not None else None
 
         if self.return_type == 'numpy' :
-            return np.array(sample)
+            sample = np.array(sample)
+            label = np.array(label) if label is not None else None
         elif self.return_type == 'torch' :
-            return torch.tensor(sample)
+            sample = torch.tensor(sample)
+            label = torch.tensor(label) if label is not None else None
+
+        if label is None :
+            return sample
+        else :
+            return sample, label
 
     def get_feature(self, feature_name : str) :
         """

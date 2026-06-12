@@ -1,0 +1,16 @@
+app = "flower_hist"
+dataset_id = 'synth_1'
+debug = true
+max_number_of_attempts = 10
+path_to_save = "./results"
+
+# ML App Settings
+ml_model_name = "SVM"
+alpha = 1
+penalty = "l2"
+loss = "squared_hinge"
+dual = 'auto'
+tol = 1e-4
+C = 1.0
+multi_class = "ovr"
+max_iter = 1000

@@ -44,6 +44,8 @@ class data_connector(ABC):
     get_feature()
         Retrieve a single feature from the data source.
     """
+
+    SUPPORTED_COMPARISON_TYPE : list = ['equals', 'not_equals', 'greater_than', 'less_than', 'less_than_or_equal', 'greater_than_or_equal']
     
     def __init__(self, config : generic.connector_config) :
         """
@@ -58,7 +60,7 @@ class data_connector(ABC):
         self.modality = config.modality
         self.config = config
 
-        self.SUPPORTED_COMPARISON_TYPE = ['equals', 'not_equals', 'greater_than', 'less_than', 'less_than_or_equal', 'greater_than_or_equal']
+        self.set_labels()
 
     # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     # Abstract methods that must be implemented by all connectors
@@ -101,6 +103,15 @@ class data_connector(ABC):
             If not implemented by a subclass.
         """
         raise NotImplementedError("Subclasses must implement this method.")
+
+    @abstractmethod
+    def set_labels(self) :
+        """
+        Based on the specific implementation of the connector and the data source, set the labels for the samples in the dataset if they are available.
+        If the dataset does not have labels, this method should set the labels attribute to None.
+        """
+
+        raise NotImplementedError("Subclasses must implement this method. If you write a custom __init__ method for your connector, make sure to call this method at the end of your __init__ method to set the labels correctly.")
 
     @abstractmethod
     def get_feature(self, feature : str) :

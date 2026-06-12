@@ -28,12 +28,14 @@ class synthetic_connector_config(connector_config):
     ----------
     modality : str
         Always set to 'synthetic'.
+    seed : int
+        Random seed for reproducibility. Default is 42.
     distribution : Literal['normal', 'uniform']
         Type of distribution for synthetic data. Default is 'normal'.
     size : tuple | list
         Size of the generated data. Default is (1000, 20), i.e. 1000 samples with 20 features.
-    seed : int
-        Random seed for reproducibility. Default is 42.
+    n_classes : int
+        OPTIONAL. Number of classes for the labels. If used must be a number equal or greater than 2. Otherwise, the labels will not be generated.
     
     Examples
     --------
@@ -45,6 +47,9 @@ class synthetic_connector_config(connector_config):
     seed : int = 42
     distribution: Literal['normal', 'uniform'] = 'normal'
     size : list | tuple = (1000, 20)
+
+    # Label parameters
+    n_classes : int = -1
 
     # Parameters for normal distribution
     loc: float = 0
@@ -61,9 +66,11 @@ class synthetic_connector_config(connector_config):
 
         config = dict(
             modality = self.modality,
+            seed = self.seed,
             distribution = self.distribution,
             size = self.size,
-            seed = self.seed,
+            # Label parameters
+            n_classes = self.n_classes,
             # Parameters for normal distribution
             loc = self.loc if self.distribution == 'normal' else None,
             scale = self.scale if self.distribution == 'normal' else None,
@@ -82,9 +89,11 @@ class synthetic_connector_config(connector_config):
 
         return cls(
             modality      = config_dict.get('modality', 'synthetic'),
+            seed          = config_dict.get('seed', 42),
             distribution  = config_dict.get('distribution', 'normal'),
             size          = config_dict.get('size', (1000, 20)),
-            seed          = config_dict.get('seed', 42),
+            # Label parameters
+            n_classes     = config_dict.get('n_classes', 2),
             # Parameters for normal distribution
             loc           = config_dict.get('loc', 0),
             scale         = config_dict.get('scale', 1),
