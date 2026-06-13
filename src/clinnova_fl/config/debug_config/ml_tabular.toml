@@ -1,11 +1,14 @@
-app = "flower_hist"
+app = "flower_ml_tabular"
 dataset_id = 'synth_1'
 debug = true
 max_number_of_attempts = 10
 path_to_save = "./results"
 
-# ML App Settings
+# ML App General Settings
 ml_model_name = "SVM"
+fields_to_use_for_the_train = []
+
+# ML App Specific model settings
 alpha = 1
 penalty = "l2"
 loss = "squared_hinge"
