@@ -7,8 +7,12 @@ path_to_save = "./results"
 # ML App General Settings
 ml_model_name = "SVM"
 fields_to_use_for_the_train = []
+num_rounds = 4
+num_classes = -1 # This is required because you need to create initial random parameters
+n_features = -1 # This is required because you need to create initial random parameters. In case you use also fields_to_use_for_the_train it will be ignored.
 
-# ML App Specific model settings
+# Dictionary with settings specific for the ML model
+[ml_model_config]
 alpha = 1
 penalty = "l2"
 loss = "squared_hinge"

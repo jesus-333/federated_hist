@@ -33,26 +33,26 @@ def main(grid: Grid, context: Context, experiment_config : dict) -> None:
     
     # Get the app config from the experiment config
     app_config = experiment_config['app_config']
-
-    fields_to_use_for_train = app_config['path_file_with_fields_to_use_for_the_train']
-
-    # Load server data
-    x_server, y_server, _ = support_ml_app.get_data(server_config['path_server_data'], fields_to_use_for_train)
     
-    # Path to save the final results
-    path_to_save = server_config['path_to_save'] if 'path_to_save' in server_config else './results/'
+    # Fields (features) to use for the training
+    # fields_to_use_for_train = app_config['path_file_with_fields_to_use_for_the_train']
+    fields_to_use_for_the_train = app_config['fields_to_use_for_the_train'] if 'fields_to_use_for_the_train in app_config' else None
+    n_features = experiment_config['n_features'] if fields_to_use_for_the_train is None else len(fields_to_use_for_the_train)
+
+    # Path to save the final histogram
+    path_to_save = app_config['path_to_save'] if 'path_to_save' in app_config else './results/'
 
     # Dictionary used to communicate with the clients
-    my_config = server_config['ml_algorithm_config']
-    my_config['ml_model_name'] = server_config['ml_model_name']
-    my_config['fields_to_use_for_the_train'] = fields_to_use_for_train
+    my_config = app_config['ml_model_config']
+    my_config['ml_model_name'] = app_config['ml_model_name']
+    my_config['fields_to_use_for_the_train'] = fields_to_use_for_the_train
 
     # Create ml model
     ml_model = support_ml_app.get_ml_model(my_config['ml_model_name'], my_config)
     log(INFO, f"ML Model created: {ml_model}")
 
     # Setting initial parameters (it is required by flower) and convert them in an ArrayRecord representation
-    support_ml_app.set_initial_params(my_config['ml_model_name'], ml_model, 3, x_server.shape[1])
+    support_ml_app.set_initial_params(my_config['ml_model_name'], ml_model, experiment_config['num_classes'], n_features)
     arrays = ArrayRecord(support_ml_app.get_model_params(my_config['ml_model_name'], ml_model))
     
     # Create FL strategy
@@ -65,7 +65,7 @@ def main(grid: Grid, context: Context, experiment_config : dict) -> None:
     result = fl_strategy.start(
         grid = grid,
         initial_arrays = arrays,
-        num_rounds = server_config['num_rounds'],
+        num_rounds = app_config['num_rounds'],
         train_config = train_config
     )
     

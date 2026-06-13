@@ -113,7 +113,7 @@ def set_model_params(ml_model_name : str, ml_model, params: NDArrays) :
     return ml_model
 
 
-def set_initial_params(ml_model_name : str, ml_model, n_classes : int, n_features : int) :
+def set_initial_params(ml_model_name : str, ml_model, num_classes : int, n_features : int) :
     """
     Set initial parameters as zeros.
     
@@ -125,15 +125,16 @@ def set_initial_params(ml_model_name : str, ml_model, n_classes : int, n_feature
     
     if ml_model_name == 'SVM' or ml_model_name == 'LASSO':
         # Setup the model classes
-        ml_model.classes_ = np.array([i for i in range(n_classes)])
-
-        coef = np.zeros((n_classes, n_features))
-        intercept = np.zeros((n_classes,))
-
+        ml_model.classes_ = np.array([i for i in range(num_classes)])
+        
+        # Createa fake array for coef and intercept
+        coef = np.random.rand((num_classes, n_features))
+        intercept = np.random.rand((num_classes,))
         initial_param = [coef, intercept]
-
-        x_fake = np.random.rand(n_classes, n_features)
-        y_fake = np.arange(n_classes)
+        
+        # Fit on random data. See docstring
+        x_fake = np.random.rand(num_classes, n_features)
+        y_fake = np.arange(num_classes)
         ml_model.fit(x_fake, y_fake)
     elif ml_model_name == 'k-means' :
         initial_param = get_kmeans_initial_parameters()

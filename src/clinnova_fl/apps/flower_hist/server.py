@@ -59,8 +59,8 @@ def main(grid: Grid, context: Context, experiment_config : dict) -> None:
     bins_variable = app_config['bins_variable'] if 'bins_variable' in app_config else None
     bins_distribution = app_config['bins_distribution'] if 'bins_distribution' in app_config else 'uniform'
 
-    import pprint
-    pprint.pprint(app_config)
+    # import pprint
+    # pprint.pprint(app_config)
 
     # Check settings
     if min_nodes <= 0 :
@@ -83,13 +83,6 @@ def main(grid: Grid, context: Context, experiment_config : dict) -> None:
     # Path to save the final histogram
     path_to_save = app_config['path_to_save'] if 'path_to_save' in app_config else './results/'
     
-    # Dictionary used to communicate with the clients
-    # my_config = dict(
-    #     server_round = -1,
-    #     bins_variable = bins_variable,
-    #     bins_distribution = bins_distribution
-    # )
-
     # Create the dictionary to send to the clients.
     # For more info about sending and receiving data see the docstring of the function get_data_from_clients and send_and_receive_data in support_fl.py.
     my_config = app_config.copy()
