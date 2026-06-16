@@ -5,11 +5,24 @@ max_number_of_attempts = 10
 path_to_save = "./results"
 
 # ML App General Settings
-ml_model_name = "SVM"
+ml_model_name = "svm"
 fields_to_use_for_the_train = []
 num_rounds = 4
 num_classes = -1 # This is required because you need to create initial random parameters
 n_features = -1 # This is required because you need to create initial random parameters. In case you use also fields_to_use_for_the_train it will be ignored.
+use_partial_fit_if_available = false 
+
+# Note on partial fit (to move in README in future)
+# Depending on model/algorithms not always is convenient (or event "valid") to do more than 1 federated round.
+# These models that do not benefit from more round, usually do not have the warm_restart option, that allow continuing training/fitting from current parameters. 
+# Each time the fit method is called, the model discard the current parameters and compute the new ones from scratch. So 1 round or 10 rounds will give you the same results.
+# Example of similar models are LDA (LinearDiscriminantAnalysis) and SVC (LinearSVC). 
+# In contrast, models that have the warm_restart option, can benefit from more rounds, because they can continue training from current parameters.
+# For all these models the warm_restart option will always set to True, but there is a caveat. The have 2 fit method : (1) the classical fit() and (2) partial_fit().
+# When warm_restart is True, both methods will continue training/fitting from the current parameters, but they have slightly different behavior.
+# The fit() method will perform n iteration up to max_iter and it will reset the lr scheduler
+# The partial_fit() method will instead always perform only 1 iteration and do not reset the lr scheduler.
+# Now... I do not think that this change too much for this use cases since in each federated round the model is reistantiated but I prefer to have this option here as a reminder.
 
 # Dictionary with settings specific for the ML model
 [ml_model_config]
