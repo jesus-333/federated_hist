@@ -8,18 +8,16 @@ from __future__ import annotations
 
 # General imports
 import numpy as np
-import pandas as pd
-import toml
 
 # Flower imports
 from flwr.common import Context, Message, MetricRecord, RecordDict
 
 # Internal imports
-from clinnova_fl.data_connector.generic import data_connector
+from clinnova_fl.dataset import tabular
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-def query(msg : Message, context : Context, data_connector : data_connector):
+def query(msg : Message, context : Context, dataset_istance : tabular.dataset):
     """
     Construct histogram of local dataset and report to `ServerApp`.
     """
@@ -82,7 +80,7 @@ def query(msg : Message, context : Context, data_connector : data_connector):
     bins_variable = my_config["bins_variable"]
     
     # Get the dataset
-    data_to_calculate_hist = data_connector.get_feature(bins_variable)
+    data_to_calculate_hist = dataset_istance.get_feature(bins_variable)
     
     # Variable to store the results of the query
     query_results = {}

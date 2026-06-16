@@ -10,18 +10,21 @@ Alberto (Jesus) Zancanaro <alberto.zancanaro@uni.lu>
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Imports
 
+# Module imports
 import os
 import pickle
-import toml
 
+# Specific imports
 from logging import INFO
 
-from flwr.common import ArrayRecord, ConfigRecord, Context, Message, MessageType, RecordDict
+# Flower imports
+from flwr.common import ArrayRecord, ConfigRecord, Context
 from flwr.common.logger import log
 from flwr.server import Grid
 from flwr.serverapp import strategy
 
-import support_ml_app
+# Internal imports
+from clinnova_fl.apps.flower_ml_tabular.ml_models import generic
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Flower ServerApp
@@ -32,34 +35,36 @@ def main(grid: Grid, context: Context, experiment_config : dict) -> None:
     """
     
     # Get the app config from the experiment config
+    # TODO : Add check to the config for specific algorithm. E.g. LDA should need only 1 federated round
     app_config = experiment_config['app_config']
     
     # Fields (features) to use for the training
     # fields_to_use_for_train = app_config['path_file_with_fields_to_use_for_the_train']
     fields_to_use_for_the_train = app_config['fields_to_use_for_the_train'] if 'fields_to_use_for_the_train in app_config' else None
-    n_features = experiment_config['n_features'] if fields_to_use_for_the_train is None else len(fields_to_use_for_the_train)
+    n_features = app_config['n_features'] if fields_to_use_for_the_train is None else len(fields_to_use_for_the_train)
 
     # Path to save the final histogram
     path_to_save = app_config['path_to_save'] if 'path_to_save' in app_config else './results/'
 
     # Dictionary used to communicate with the clients
-    my_config = app_config['ml_model_config']
-    my_config['ml_model_name'] = app_config['ml_model_name']
-    my_config['fields_to_use_for_the_train'] = fields_to_use_for_the_train
+    # my_config = app_config['ml_model_config']
+    # my_config['ml_model_name'] = app_config['ml_model_name']
+    # my_config['fields_to_use_for_the_train'] = fields_to_use_for_the_train
 
     # Create ml model
-    ml_model = support_ml_app.get_ml_model(my_config['ml_model_name'], my_config)
+    ml_model = generic.get_ml_model(app_config['ml_model_name'], app_config['ml_model_config'])
     log(INFO, f"ML Model created: {ml_model}")
 
     # Setting initial parameters (it is required by flower) and convert them in an ArrayRecord representation
-    support_ml_app.set_initial_params(my_config['ml_model_name'], ml_model, experiment_config['num_classes'], n_features)
-    arrays = ArrayRecord(support_ml_app.get_model_params(my_config['ml_model_name'], ml_model))
-    
+    # support_ml_app.set_initial_params(my_config['ml_model_name'], ml_model, app_config['num_classes'], n_features)
+    ml_model.init_params(app_config['num_classes'], n_features)
+    arrays = ArrayRecord(ml_model.get_params())
+
     # Create FL strategy
     fl_strategy = strategy.FedAvg()
 
     # Create train config
-    train_config = ConfigRecord(config_dict = my_config)
+    train_config = ConfigRecord(config_dict = app_config)
     
     # Federated training
     result = fl_strategy.start(
@@ -72,7 +77,7 @@ def main(grid: Grid, context: Context, experiment_config : dict) -> None:
     # Get the results
     # Note that the function to_numpy_ndarrays() return the ArrayRecord as a list of NumPy ndarray.
     params_final = result.arrays.to_numpy_ndarrays()
-    support_ml_app.set_model_params(my_config['ml_model_name'], ml_model, params_final)
+    # support_ml_app.set_model_params(my_config['ml_model_name'], ml_model, params_final)
 
     # Save the final weights of the model
     os.makedirs(path_to_save, exist_ok = True)

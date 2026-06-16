@@ -117,7 +117,7 @@ def set_initial_params(ml_model_name : str, ml_model, num_classes : int, n_featu
     """
     Set initial parameters as zeros.
     
-    From a Flower tutorial (https://github.com/adap/flower/blob/main/examples/quickstart-sklearn-tabular/sklearnexample/task.py)
+    From a Flower tutorial (https://github.com/flwrlabs/flower/blob/main/examples/quickstart-sklearn/sklearnexample/task.py)
     Required since model params are uninitialized until model.fit is called but server
     asks for initial parameters from clients at launch. Refer to
     sklearn.linear_model.LogisticRegression documentation for more information.

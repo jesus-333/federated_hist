@@ -36,7 +36,7 @@ def evaluate(msg : Message, context : Context) :
     custom_config, node_config = get_experiment_and_node_config(msg, context)
 
     # Get the data connector
-    data_connector = generic.get_dataset(custom_config, node_config)
+    dataset_istance = generic.get_dataset(custom_config, node_config)
 
     # Get the evaluation function for the specified app
     if context.run_config["app"] == "flower_hist" :
@@ -48,7 +48,7 @@ def evaluate(msg : Message, context : Context) :
     else :
         raise ValueError(f"Invalid app specified in the server configuration file: {context.run_config['app']}. Valid options are: {apps.LIST_OF_APPS}")
 
-    return evaluate(msg, context, data_connector)
+    return evaluate(msg, context, dataset_istance)
 
 @app.query()
 def query(msg : Message, context : Context) :
@@ -60,7 +60,7 @@ def query(msg : Message, context : Context) :
     custom_config, node_config = get_experiment_and_node_config(msg, context)
 
     # Get the data connector
-    data_connector = generic.get_dataset(custom_config, node_config)
+    dataset_istance = generic.get_dataset(custom_config, node_config)
     
     # Get the query function for the specified app
     if context.run_config["app"] == "flower_hist" :
@@ -72,7 +72,7 @@ def query(msg : Message, context : Context) :
     else :
         raise ValueError(f"Invalid app specified in the server configuration file: {context.run_config['app']}. Valid options are: {apps.LIST_OF_APPS}")
 
-    return query(msg, context, data_connector)
+    return query(msg, context, dataset_istance)
 
 @app.train()
 def train(msg : Message, context : Context) :
@@ -84,7 +84,7 @@ def train(msg : Message, context : Context) :
     custom_config, node_config = get_experiment_and_node_config(msg, context)
 
     # Get the data connector
-    data_connector = generic.get_dataset(custom_config, node_config)
+    dataset_istance = generic.get_dataset(custom_config, node_config)
 
     # Get the training function for the speciefied app
     if context.run_config["app"] == "flower_hist" :
@@ -96,7 +96,7 @@ def train(msg : Message, context : Context) :
     else :
         raise ValueError(f"Invalid app specified in the server configuration file: {context.run_config['app']}. Valid options are: {apps.LIST_OF_APPS}")
 
-    return train(msg, context, data_connector)
+    return train(msg, context, dataset_istance)
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -166,10 +166,10 @@ def get_simulated_node_config(context : Context, custom_config : dict) -> dict :
         error_message += "\nThis key is required to run the app in simulation mode, as it contains the paths for the node configuration files."
         raise ValueError(error_message)
 
-    print("QUESTO CUSTOM CONFIG ")
-    pprint.pprint(custom_config)
-    print("QUESTO e' CONTEXT")
-    pprint.pprint(context )
+    # print("QUESTO CUSTOM CONFIG ")
+    # pprint.pprint(custom_config)
+    # print("QUESTO e' CONTEXT")
+    # pprint.pprint(context )
     
     # Get the path for the node config and load it
     # TODO Convert to Path object
