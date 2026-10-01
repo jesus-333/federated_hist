@@ -129,7 +129,9 @@ def get_experiment_and_node_config(msg : Message, context : Context) -> tuple[di
     elif 'run_with_nvflare' in custom_config :
         node_config = get_nvflare_node_config() if custom_config['run_with_nvflare'] else dict()
     else :
-        node_config = context.node_config
+        # TODO : This is a temporary solution. The best option to handle the node config on real deployment will be decided in the future.
+        full_node_config_path = context.node_config['full_node_config_path'] if 'full_node_config_path' in context.node_config else None
+        node_config = toml.load(full_node_config_path) if full_node_config_path is not None else dict()
 
     return custom_config, node_config
 

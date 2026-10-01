@@ -37,7 +37,7 @@ from clinnova_fl.apps.support_fl import get_data_from_clients, get_node_ids
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Flower ServerApp
 
-def main(grid: Grid, context: Context, experiment_config : dict) -> None:
+def main(grid : Grid, context: Context, experiment_config : dict) -> None:
     """
     This `ServerApp` construct a histogram from partial-histograms reported by the `ClientApp`s.
     """

@@ -34,9 +34,9 @@ In Federated Learning (FL), the usual workflow is to have two main "components" 
 - A server that orchestrates the FL process, i.e. it sends the model to the clients, receives the updates from the clients, aggregates them and sends back the updated model to the clients.
 - A number of clients that train the model on their local data and send the updates to the server. Ideally, data client data should never leave the client, and the server should never have access to the client data.
 
-Now, to understand the rest of the package you should have at least a basic understanding of the Flower framework, which is a framework for implementing FL applications.
+Now, to understand the rest of the package, you should have at least a basic understanding of the Flower framework, which is a framework for implementing FL applications.
 You could broadly divide the Flower framework in two "parts" : Logic and infrastructure (these are not official Flower terms, but they are useful to understand how Flower works).
-- The "Logic" part is the practical implementation of the FL logic, i.e. local training and aggregation. Flower call this part "app", and it is the part that is usually implemented by the scientist/researcher. This part is also the main focus of this package.
+- The "Logic" part is the practical implementation of the FL logic, i.e. local training, aggregation in the server, eventual evaluation etc. Flower call this part "app", and it is the part that is usually implemented by the scientist/researcher. This part is also the main focus of this package.
 - The "infrastructure" part is responsible for the communication between the server and the clients, and for the orchestration of the FL process. This part is implemented by Flower itself, and is not something that you need to worry about when implementing a new app. Also, with the integration of Flower with NVFlare, the infrastructure part could be substituted by the latter. So you can basically run Flower app on top of NVFlare.
 
 Each Flower app is composed by two "sub-apps" :
@@ -216,10 +216,18 @@ node_config = {
     }
 ```
 
-Then, when the dataset class is instantiated, it will read the `dataset_id` from the `node-config` and use it to instantiate the corresponding `data_connector` object.
+Then, when the dataset class is instantiated, it will use the `dataset_id` to get the corresponding config from the `node_config`.
+The config that it retrieves is another dictionary that contains two entries :
+- `dataset_types` : the type of dataset, e.g. `tabular`, `image`, etc. This is used to instantiate the corresponding dataset class.
+- `dataset_connector_config_file_path` : the path to the config file that contains the configuration
 
 E.g. suppose you have a tabular dataset stored in a csv file. The dataset is called `awesome_dataset`. 
 Then you specify in the config file the `dataset_id` as `awesome_dataset`
 
 # `ui` module
+
+
+
+
+
 

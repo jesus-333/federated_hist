@@ -19,7 +19,6 @@ from clinnova_fl.data_connector.generic import data_connector as generic_data_co
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-
 class data_connector(generic_data_connector):
     """
     Data connector for CSV files.

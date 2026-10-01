@@ -77,7 +77,7 @@ class model(generic.get_ml_model) :
         # before fit() has ever run.
         self.model.classes_ = np.array([i for i in range(num_classes)])
 
-        # Zero-filled placeholders with the correct. 
+        # Zero-filled placeholders with the correct.
         # Note that sklearn linear classifiers use a single row for the binary case and one row per class for the multiclass (one-vs-all) case.
         n_rows = 1 if num_classes == 2 else num_classes
         coef = np.zeros((n_rows, n_features))

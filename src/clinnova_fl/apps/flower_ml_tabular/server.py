@@ -29,7 +29,7 @@ from clinnova_fl.apps.flower_ml_tabular.ml_models import generic
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Flower ServerApp
 
-def main(grid: Grid, context: Context, experiment_config : dict) -> None:
+def main(grid: Grid, context : Context, experiment_config : dict) -> None:
     """
     This `ServerApp` train classic ML models through FedAvg.
     """
@@ -81,4 +81,4 @@ def main(grid: Grid, context: Context, experiment_config : dict) -> None:
 
     # Save the final weights of the model
     os.makedirs(path_to_save, exist_ok = True)
-    with open(f'{path_to_save}/final_params_{my_config["ml_model_name"]}.pkl', "wb") as f : pickle.dump(params_final, f)
+    with open(f'{path_to_save}/final_params_{app_config["ml_model_name"]}.pkl', "wb") as f : pickle.dump(params_final, f)
