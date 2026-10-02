@@ -30,18 +30,31 @@ See the sections below for more details.
 
 ## Brief introduction to Federated Learning and Flower
 
-In Federated Learning (FL), the usual workflow is to have two main "components" :
-- A server that orchestrates the FL process, i.e. it sends the model to the clients, receives the updates from the clients, aggregates them and sends back the updated model to the clients.
+Since you reading this, I assume that you have at least a basic understanding of Federated Learning (FL) and the Flower framework.
+But just to be sure, I will provide a very quick overiew. FL is a machine learning paradigm that allows multiple clients to collaboratively train a model without sharing their data.
+The usual workflow is something like this :
+- A central server creates a model with random weights and send it to the clients.
+- Each client trains the model on its local data and sends the updated weights back to the server.
+- The server aggregates the updates from the clients and sends back the updated model to the clients.
+- Repeat the process until the model converges or a stopping criterion is met.
+Then, you can have more complex workflows, and even remove the central server, the so called decentralized FL. But the main idea of sharing the model until some convergence is reached remains the same.
+For your information, this package (at least for the moment) would not consider decentralized FL. So all the FL workflows implemented in this package will have a central server that orchestrates the FL process.
+
+So in general, the usual workflow have two main "components" :
+- A server that orchestrates the FL process, i.e. it sends the model to the clients, receives the updates from the clients, aggregates them and sends back the updated model to the clients. The way the server aggregates the updates from the clients is usually called "strategy".
 - A number of clients that train the model on their local data and send the updates to the server. Ideally, data client data should never leave the client, and the server should never have access to the client data.
 
 Now, to understand the rest of the package, you should have at least a basic understanding of the Flower framework, which is a framework for implementing FL applications.
 You could broadly divide the Flower framework in two "parts" : Logic and infrastructure (these are not official Flower terms, but they are useful to understand how Flower works).
-- The "Logic" part is the practical implementation of the FL logic, i.e. local training, aggregation in the server, eventual evaluation etc. Flower call this part "app", and it is the part that is usually implemented by the scientist/researcher. This part is also the main focus of this package.
+- The "Logic" part is the practical implementation of the FL logic, i.e. local training, aggregation in the server, experiment tracking etc. Flower call this part "app", and it is the part that is usually implemented by the scientist/researcher. This part is also the main focus of this package.
 - The "infrastructure" part is responsible for the communication between the server and the clients, and for the orchestration of the FL process. This part is implemented by Flower itself, and is not something that you need to worry about when implementing a new app. Also, with the integration of Flower with NVFlare, the infrastructure part could be substituted by the latter. So you can basically run Flower app on top of NVFlare.
 
 Each Flower app is composed by two "sub-apps" :
-- A server app that implements the server logic, i.e. aggregation, eventual model evaluation, etc.
+- A server app that implements the server logic, i.e. aggregation, eventual experiment tracking, etc.
 - A client app that implements the client logic, i.e. it trains the model on local data.
+
+Another things that you should know is that Flower already provides a number of "ready-to-use" strategy for the server app, e.g. FedAvg, FedProx, etc.
+These are methods that already implement the aggregation logic for the server app, and you can use them in your app without having to implement them yourself.
 
 ## `app` module implementation
 
@@ -68,7 +81,7 @@ The root [`client.py`](./clinnova_fl/apps/client.py) and [`server.py`](./clinnov
 Based on the configuration loaded when they are instantiated, they call the app-specific client and server functions (For more detail see the section on the `config` module).
 (this means that the root "app" is the only "true" Flower app, and the other apps are just specific implementations called from the root app).
 
-Each specific implementation of must have the same internal structure, with a `client.py` and `server.py` file that implement the client and server logic for that specific app.
+Each specific implementation of MUST have the same internal structure, with a `client.py` and `server.py` file that implement the client and server logic for that specific app.
 The `cli.py` file is an optional file that include the logic to call the app directly from the command line.
 Once implemented the app functions calls must be added to the generic [`client.py`](./clinnova_fl/apps/client.py) and [`server.py`](./clinnova_fl/apps/server.py) files, so they can be called from the root app.
 
@@ -76,7 +89,7 @@ E.g., if you use the histogram app, the [root `client.py`](./clinnova_fl/apps/cl
 
 ## How do you implement a new app?
 
-Supposed you have a new app that you want to implement. The first step is to create a new folder inside the [`apps`](./clinnova_fl/apps/) module, with the name of your app. Inside this folder you must create the following files :
+Supposed you have an idea for a new app that you want to implement. The first step is to create a new folder inside the [`apps`](./clinnova_fl/apps/) module, with the name of your app. Inside this folder you must create the following files :
 - `__init__.py` : the init file for the app folder.
 - `client.py`: the file that implements the client logic for your app.
 - `server.py`: the file that implements the server logic for your app.
@@ -86,29 +99,30 @@ I will provide you some details to allow you to understand how this package work
 
 ## Server app implementation
 
-In Flower the server app must always have a function with a specific decorator, called `@app.main()`.
+In Flower the main server app must always be function with a specific decorator, called precisely `@app.main()`.
 In general the signature of the function is as follows :
 
 ```python
+# Import the necessary modules from Flower
 from flwr.common import Context
 from flwr.server import Grid, ServerApp
 
+app = ServerApp() # ServerApp is a class provided by Flower
 
-app = ServerApp()
-
-@app.main()
+@app.main() # Decorator that registers the function as the entry point of the server app
 def main(grid: Grid, context: Context) -> None :
+    # Server app logic goes here
     ...
 ```
 
 The decorator register the function as the entry point of the server app, i.e. when Flower executes the app that function will be the first one to be called.
-This is also the reason why the function is called `main()`, as it is the main function of the server app (then to be fair the function can have any name, it's the decorator that makes it the entry point of the app... but it is a good practice to call it `main()` to avoid confusion).
-The function must takes in input two argoments, `grid` and `context`, which are custom objects provided by Flower to allow the app to interact with the Flower framework.
-- `grid` : a `Grid` object that provides access to the grid of clients. The grid is a collection of clients that are available for training. The `Grid` object provides methods to access the clients, e.g. to get the list of clients, to get a specific client, etc. See [here](https://flower.ai/docs/framework/ref-api/flwr.serverapp.Grid.html) for more details.
-- `context` : a `Context` object that provides access to the context for your app. Practically, it's an object that contains some defined properties that can be used by used to access configurations and information about the app. See [here](https://flower.ai/docs/framework/ref-api/flwr.app.Context.html) for more details.
+This is also the reason why the function is called `main()`, as it is the main function of the server app (to be fair the function can have any name, it's the decorator that makes it the entry point of the app... but I think that it is a good practice to call it `main()` to avoid confusion).
+The function with the decorator takes in input two arguments, `grid` and `context`, which are custom objects provided by Flower to allow the app to interact with the Flower framework.
+- `grid` : a `Grid` object that provides access to the grid of clients (i.e. the federated network). The grid is a collection of clients that are available for training. The `Grid` object provides methods to access the clients, e.g. to get the list of clients, to get a specific client, etc. See [here](https://flower.ai/docs/framework/ref-api/flwr.serverapp.Grid.html) for more details.
+- `context` : a `Context` object that provides access to the context for your app. Practically, it's an object that contains some defined properties that can be used by used to access configurations and information about the app. See [here](https://flower.ai/docs/framework/ref-api/flwr.app.Context.html) and Flower Tutorials for more details.
 
 Now, you do not have to implement this server app inside your `server.py` file, as it is already implemented in the root [`server.py`](./clinnova_fl/apps/server.py) file.
-What you need to implement in your `server.py` file is a function that will be called by the root server app, and that will implement the specific logic of your app.
+But what you need to implement in your `server.py` file is something quite similar. It is a function that will be called by the root server app, and that will implement the specific logic of your app.
 The function MUST have a specific signature, as it will be called by the root server app with specific arguments. The signature of the function is as follows :
 
 ```python
@@ -119,8 +133,8 @@ def main(grid: Grid, context : Context, experiment_config) -> None :
     ...
 ```
 
-So the main differences are the absence of the decorator, and the presence of a third argument called `experiment_config`, which is a dictionary that contains the configuration for the experiment. For more details about the configuration see the section on the `config` module.
-After that, inside the function you could do whatever things you want, e.g. you could implement the logic to train a model, to evaluate a model, to aggregate the updates from the clients, etc.
+So the main differences are the absence of the decorator, and the presence of a third argument called `experiment_config`, which is a dictionary or a dataclass that contains the configuration for the experiment. For more details about the configuration see the section on the `config` module.
+After that, inside the function you could do whatever things you want, e.g. you could implement the logic, to evaluate a model, to aggregate the updates from the clients, to save the results etc.
 You can see the implementation of a server app that use a flower defined strategy in the [`flower_ml_tabular`](./clinnova_fl/apps/flower_ml_tabular/server.py) and an app that implement a custom strategy in the [`flower_hist`](./clinnova_fl/apps/flower_hist/server.py) app, which is a simple app that implements a histogram computation on the clients and aggregates the results on the server.
 
 If you need to visualize the workflow of the server app, here there is a simple diagram :
@@ -151,7 +165,65 @@ Here a more detailed breakdown :
 
 ## Client app implementation
 
-...
+For all intents and purposes, the client app is very similar to the server app, with the main difference that it implements the client logic instead of the server logic.
+The connection between the root client app and the specific client app follow the same structure as the server app, i.e. the root client app execute its required function and then call the specific client app function, passing the required arguments to it.
+
+The main difference is the possible number of entry points for the client app.
+For the server app, Flower provides a single decorator, `@app.main()`, that we already explained above (there is a side note about this... for those interested, it's at the end of the section.)
+For the client app, instead, Flower provides three decorators : `@app.train()`, `@app.evaluate()` and `@app.query()`. 
+So the root client app will call one (or more) of these three functions, which, in turn, will call the corresponding implementation within the server app.
+
+What are the differences between these decorators? 
+Depends on how you analyze them. From the point of view of strategies already implemented in Flower (e.g. FedAvg, FedProx, etc.), the `@app.train()` and `@app.evaluate()` decorators are the most important ones, as they are the ones that will be called by the strategy at each federated round.
+Otherwise, if you want to implement your own strategy, they are (technically) interchangeable, but it is a good practice to use them as they are intended, i.e. `@app.train()` for the training logic and `@app.evaluate()` for the evaluation logic.
+A little bit more detailed explanation about the three decorators is provided below.
+
+### `@app.train()` and `@app.evaluate()` decorators
+
+These are the most common decorators, and, as the name suggests, they are used to implement the training and evaluation logic of the client app.
+
+Flower requires that the functions with these decorators have a specific signature, i.e.
+```python
+# Flower imports
+from flwr.client import ClientApp
+from flwr.common import Context, Message
+
+app = ClientApp() # ClientApp is a class provided by Flower
+
+@app.train()
+def train(msg : Message, context : Context) :
+    # Implement the training logic here
+    ...
+
+@app.evaluate()
+def evaluate(msg : Message, context : Context) :
+    # Implement the evaluation logic here
+    ...
+```
+
+The two objects `msg` and `context` are provided by Flower to allow the app to interact with the Flower framework.
+- `msg` : a `Message` object that contains the message between the server and the client. They were introduced by the with the [Message API Update](https://flower.ai/docs/framework/how-to-upgrade-to-message-api.html) and now they constitute the backbone of the communications in the federated network.
+- `context` : same as the `context` object in the server app.
+
+By the way, when you use strategies already implemented in Flower, e.g. FedAvg, FedProx, etc., these two functions are the one that will be called automatically by the strategy.
+More specifically, at each round the strategy will call, in order, the `train()` function and then the `evaluate()` (in case you do not implement the latter, you will receive a warning).
+
+But how does the Flower framework know which function to call each time?
+Well, through the `msg` object. As mentioned above these objects are the backbone of the communications in the federated network. Between all the various fields there are two that are very important.
+- One is called `content`, and contains the actual information of the message. Again, I will not go into details. Check Flower documentation for more details.
+- The other is called `message_type`, and it is a string that indicates the type of message. Now the message type can have only 3 possible values : `train`, `evaluate` and `query`. 
+So, when the client app receives a message from the server, it will check the `message_type` field of the `msg` object, and based on its value it will call the corresponding function, i.e. `train()` for `train`, `evaluate()` for `evaluate` and `query()` for `query`.
+
+### `@app.query()` decorator
+
+The `@app.query()` decorator is a little bit different from the other two, as it is not used by default by any Flower strategy. You can use it to implement custom communication logic between the server and the client to retrieve specific information.
+
+If you want a full example you could check the [Histogram app](./clinnova_fl/apps/flower_hist/), which implements a histogram computation on the clients and aggregates the results on the server.
+This app will always execute two custom rounds. 
+In the first, the server sends a query message to the clients, asking for max and min values of the dataset.
+Then, the clients will reply and the server will use these results to compute common histogram bins for all clients.
+In the second round, the server will send another query message to the clients, asking for the histogram of the dataset using the common bins computed in the first round.
+Then, the clients will reply and the server will aggregate the results to compute the final histogram.
 
 # `config` module
 

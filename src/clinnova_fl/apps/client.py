@@ -42,7 +42,7 @@ def evaluate(msg : Message, context : Context) :
     if context.run_config["app"] == "flower_hist" :
         raise NotImplementedError("The 'flower_hist' app does not have an 'evaluate' function.")
     elif context.run_config["app"] == "flower_ml" :
-        from clinnova_fl.apps.flower_ml.client import evaluate
+        from clinnova_fl.apps.flower_ml_tabular.client import evaluate
     elif context.run_config["app"] == "flower_k_means" :
         pass
     else :
@@ -90,7 +90,7 @@ def train(msg : Message, context : Context) :
     if context.run_config["app"] == "flower_hist" :
         raise NotImplementedError("The 'flower_hist' app does not have a 'train' function.")
     elif context.run_config["app"] == "flower_ml" :
-        from clinnova_fl.apps.flower_ml.client import train
+        from clinnova_fl.apps.flower_ml_tabular.client import train
     elif context.run_config["app"] == "flower_k_means" :
         pass
     else :
