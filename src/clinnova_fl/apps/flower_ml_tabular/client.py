@@ -121,7 +121,7 @@ def train(msg: Message, context: Context, dataset_istance : tabular.dataset):
 #     
 #     model_weights = dict()
 #     if my_config['ml_model_name'] == 'SVM' :
-#         # For SVM the params are [coef, intercept], coef is of shape (n_classes, n_features)
+#         # For SVM the params are [coef, intercept], coef is of shape (num_classes, n_features)
 #         for i in range(len(params[0])) :
 #             model_weights[f'coef_class_{i}'] = list(params[0][i])
 #

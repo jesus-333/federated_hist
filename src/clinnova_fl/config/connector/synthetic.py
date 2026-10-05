@@ -34,7 +34,7 @@ class synthetic_connector_config(connector_config):
         Type of distribution for synthetic data. Default is 'normal'.
     size : tuple | list
         Size of the generated data. Default is (1000, 20), i.e. 1000 samples with 20 features.
-    n_classes : int
+    num_classes : int
         OPTIONAL. Number of classes for the labels. If used must be a number equal or greater than 2. Otherwise, the labels will not be generated.
     
     Examples
@@ -49,7 +49,7 @@ class synthetic_connector_config(connector_config):
     size : list | tuple = (1000, 20)
 
     # Label parameters
-    n_classes : int = -1
+    num_classes : int = -1
 
     # Parameters for normal distribution
     loc: float = 0
@@ -70,7 +70,7 @@ class synthetic_connector_config(connector_config):
             distribution = self.distribution,
             size = self.size,
             # Label parameters
-            n_classes = self.n_classes,
+            num_classes = self.num_classes,
             # Parameters for normal distribution
             loc = self.loc if self.distribution == 'normal' else None,
             scale = self.scale if self.distribution == 'normal' else None,
@@ -93,7 +93,7 @@ class synthetic_connector_config(connector_config):
             distribution  = config_dict.get('distribution', 'normal'),
             size          = config_dict.get('size', (1000, 20)),
             # Label parameters
-            n_classes     = config_dict.get('n_classes', 2),
+            num_classes   = config_dict.get('num_classes', -1),
             # Parameters for normal distribution
             loc           = config_dict.get('loc', 0),
             scale         = config_dict.get('scale', 1),

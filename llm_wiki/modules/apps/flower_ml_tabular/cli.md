@@ -13,5 +13,5 @@ No console script or function in `clinnova_fl/cli.py` calls it yet.
 ## Remaining gaps
 
 - `debug_config/ml_tabular.toml` has no `required_dataset_type`, which `write_debug_config` requires (`KeyError` in `--debug`).
-- The synthetic debug connector must produce labels (`n_classes >= 2`) for training.
+- The synthetic debug connector must produce labels (`num_classes >= 2`) for training.
 - No entry in `clinnova_fl/cli.py` and no console script in `pyproject.toml` (hyphenated name, e.g. `clinnova-ml-tabular`).

@@ -2,7 +2,7 @@ modality = 'synthetic'
 seed = 42
 distribution = 'normal'
 size = -1 			  # Update by the write_debug_config function
-n_classes = -1 		  # Update by write_debug_config function when required
+num_classes = -1 		  # Update by write_debug_config function when required
 
 # Parameters for normal distribution
 loc = 0

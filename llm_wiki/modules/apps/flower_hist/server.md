@@ -27,5 +27,5 @@ Server logic of the federated histogram (custom strategy, 2 QUERY rounds).
 - `bins_distribution = 'logarithmic'` with `min < 0 < max` leaves `bins` undefined (`pass` branch). With `min < 0` and `max <= 0` `geomspace` works only for same-sign values.
 - `min`/`max` shadow the builtins inside `main` (works, but fragile).
 - `np.average(..., weights = n_samples_list)` fails if all weights are zero (empty data).
-- `list(bins)` holds `np.float64` values. They are accepted by `ConfigRecord` as floats in current Flower, but `toml.dump` of numpy objects may need care.
-- `final_hist` is a numpy array inside `info_to_save` when dumped to TOML.
+- `list(bins)` holds `np.float64` values. They are accepted by `ConfigRecord` (verified with flwr 1.39).
+- `results_*.toml` stores numpy values as strings (e.g. `"np.int64(4)"`, `"np.float64(3.02)"`), because `toml.dump` does not know numpy types. The `.pkl`/`.npy` files are correct. Convert with `.tolist()`/`float()` before dumping.

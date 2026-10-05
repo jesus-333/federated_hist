@@ -16,7 +16,8 @@ from __future__ import annotations
 
 # General imports
 import numpy as np
-import torch
+
+# Note that torch is NOT imported here. It is an optional dependency, imported only when return_type is 'torch' (see the _import_torch function).
 
 # Internal imports
 from clinnova_fl.data_connector.generic import data_connector
@@ -79,6 +80,7 @@ class dataset(dataset):
             sample = np.array(sample)
             label = np.array(label) if label is not None else None
         elif self.return_type == 'torch' :
+            torch = _import_torch()
             sample = torch.tensor(sample)
             label = torch.tensor(label) if label is not None else None
 
@@ -114,6 +116,7 @@ class dataset(dataset):
         if self.return_type == 'numpy' :
             return np.array(feature_values)
         elif self.return_type == 'torch' :
+            torch = _import_torch()
             return torch.tensor(feature_values)
     
     # TODO : Move to generic daataset? 
@@ -131,4 +134,21 @@ class dataset(dataset):
         # So, if I do not put the "\n- " at the beginning, the first element of the list will not have it.
 
         print(f"Supported return types for this dataset are :\n{supported_return_types_nice_format}")
-    
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Support functions
+
+def _import_torch() :
+    """
+    Import and return the torch module.
+
+    torch is an optional dependency, required only when the dataset is created with ``return_type = 'torch'``.
+    Importing it lazily allows to use the dataset (with ``return_type = 'numpy'``) in environments where torch is not installed.
+    """
+
+    try :
+        import torch
+    except ImportError as e :
+        raise ImportError("The 'torch' return type requires PyTorch, which is not installed. Install it (e.g. `pip install torch`) or use return_type = 'numpy'.") from e
+
+    return torch

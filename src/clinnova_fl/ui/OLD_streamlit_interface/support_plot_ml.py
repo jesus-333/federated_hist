@@ -34,11 +34,11 @@ def plot_decision_boundary(streamlit_container_for_the_plot) :
     data_2D = reduce_data_dimensionality(data, dimen_reduction_method)
     
     # Used to model inizialiation
-    n_classes = 3
+    num_classes = 3
     n_features = data.shape[1]
 
     # Get the model
-    model = get_model(n_classes, n_features)
+    model = get_model(num_classes, n_features)
 
     # Create a meshgrid
     x_min, x_max = data_2D[:, 0].min(), data_2D[:, 0].max()
@@ -173,7 +173,7 @@ def get_meshgrid(x_min, x_max, y_min, y_max, step_x :float, step_y : float, padd
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Model function
 
-def get_model(n_classes, n_features) :
+def get_model(num_classes, n_features) :
     """
     Create the ML model and load the parameters from a pkl file.
     The model is created according to settings obtained from the streamlit session state.
@@ -190,12 +190,12 @@ def get_model(n_classes, n_features) :
     elif type_of_params == 'Only client 2' :
         path_ml_model_params = f'./results/trained_params_{ml_model_name}_node_1.pkl'
 
-    model = create_model_and_load_params(ml_model_name, path_ml_model_params, n_classes, n_features)
+    model = create_model_and_load_params(ml_model_name, path_ml_model_params, num_classes, n_features)
 
     return model
 
 @st.cache_data
-def create_model_and_load_params(ml_model_name : str, path_ml_model_params : str, n_classes : int, n_features : int) -> np.ndarray :
+def create_model_and_load_params(ml_model_name : str, path_ml_model_params : str, num_classes : int, n_features : int) -> np.ndarray :
     # Create the ml model
     model = create_model(ml_model_name)
 
@@ -203,7 +203,7 @@ def create_model_and_load_params(ml_model_name : str, path_ml_model_params : str
     with open(path_ml_model_params, 'rb') as f : params = pickle.load(f)
 
     # Load the parameters into the model
-    support_ml_app.set_initial_params(ml_model_name, model, n_classes, n_features) # This is required to initialize the params attributes inside the model object
+    support_ml_app.set_initial_params(ml_model_name, model, num_classes, n_features) # This is required to initialize the params attributes inside the model object
     support_ml_app.set_model_params(ml_model_name, model, params)
 
     return model

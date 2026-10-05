@@ -95,14 +95,14 @@ class data_connector(generic_data_connector):
         """
         Set the labels. The labels are created only if the key feature_to_predict is specified in the configuration. If the feature_to_predict is not specified or set to None, the labels are set to None.
 
-        If the feature_to_predict is specified, that column is removed from the data and set as the labels. Note that the labels should be saved as integers with values from 0 to n_classes - 1, where n_classes is the number of unique values in the feature_to_predict column.
+        If the feature_to_predict is specified, that column is removed from the data and set as the labels. Note that the labels should be saved as integers with values from 0 to num_classes - 1, where num_classes is the number of unique values in the feature_to_predict column.
         """
 
         if self.config.feature_to_predict is not None :
             # Check that the feature_to_predict is in the dataset
             if self.config.feature_to_predict not in self.data.columns : raise ValueError(f"Feature to predict '{self.config.feature_to_predict}' not found in the dataset. Available features are: {self.data.columns.tolist()}")
             
-            # Create the labels by encoding the values in the feature_to_predict column as integers from 0 to n_classes - 1, where n_classes is the number of unique values in that column.
+            # Create the labels by encoding the values in the feature_to_predict column as integers from 0 to num_classes - 1, where num_classes is the number of unique values in that column.
             self.labels = self.data[self.config.feature_to_predict].astype('category').cat.codes.to_numpy()
 
             # Check if there are negative values in the labels. 

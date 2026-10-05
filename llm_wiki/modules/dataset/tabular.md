@@ -26,8 +26,11 @@ Used by `flower_hist`.
 
 Prints the supported return types.
 
+## Notes
+
+- `torch` is optional: it is imported lazily by the module-level helper `_import_torch()`, only in the `'torch'` branches. It raises a clear `ImportError` if torch is missing.
+
 ## Known issues
 
 - `self.labels` is never assigned, so `__getitem__` and `flower_ml_tabular.client.train` raise `AttributeError`. The connector exposes `data_connector.labels`. The fix is to call `super().__init__(...)` and set `self.labels = getattr(data_connector, 'labels', None)`.
-- `torch` is imported at module level (a hard dependency even for numpy users), but it is not in `pyproject.toml`.
 - `return_type` cannot be set from configuration (always the default `'numpy'` via `get_dataset`).

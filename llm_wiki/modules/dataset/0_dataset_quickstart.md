@@ -40,6 +40,6 @@ dataset_connector_config_file_path = "/secure/path/my_dataset_connector.toml"
 
 ## Known issues (module level)
 
-- `tabular.py`/`images.py` import `torch`, which is not a declared dependency in `pyproject.toml`. Importing `dataset.tabular` fails without torch.
+- `images.py` imports `torch` at module level (not a declared dependency). `tabular.py` imports it lazily, only for `return_type = 'torch'`.
 - Labels from the connector are never propagated to the dataset (see [`tabular.md`](./tabular.md)).
 - `src/README.md` says `image`, the code says `images`.

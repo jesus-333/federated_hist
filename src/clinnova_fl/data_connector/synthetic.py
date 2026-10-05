@@ -70,10 +70,11 @@ class data_connector(generic_data_connector):
 
     def __getitem__(self, idx) :
         """
-        Return the row(s) specified by idx. The value of idx can be an integer index, a list of integer indices, a slice object (or any other type of index supported by pandas iloc).
+        Return the row(s) specified by idx. The value of idx can be an integer index, a list of integer indices, a slice object (or any other type of index supported by numpy indexing).
         """
 
-        return self.data[idx].to_numpy()
+        # self.data is already a numpy array, so no conversion is needed
+        return self.data[idx]
 
     def __len__(self) -> int :
         """
@@ -84,20 +85,31 @@ class data_connector(generic_data_connector):
 
     def set_labels(self) :
         """
-        If in the config the key 'n_classes' is specified, and has a value equals or greater than 2, then create random labels for the samples. The labels are integers from 0 to n_classes - 1, assigned randomly to the samples.
-        Otherwise, the labels are set to None.
+        If in the config the key 'num_classes' is specified, and has a value equals or greater than 2, then create random labels for the samples. The labels are integers from 0 to num_classes - 1, assigned randomly to the samples.
+        Otherwise (i.e. num_classes is None or smaller than 2, e.g. the default value -1), the labels are set to None.
         """
 
-        if self.config.n_classes is not None :
-            # Chcek that n_classes is an integer
-            if type(self.config.n_classes) is int : raise ValueError("The number of classes must be an integer.")
-            
-            # Check value of n_classes
-            if self.config.n_classes >= 2 :
-                self.labels = np.random.randint(0, self.config.n_classes, size = self.__len__())
-            else :
-                raise ValueError("The number of classes must be greater than or equal to 2.")
+        # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        # No labels requested
+
+        if self.config.num_classes is None :
+            self.labels = None
+            return
+
+        # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        # Input checks
+
+        # Check that num_classes is an integer (bool is excluded because it is a subclass of int)
+        if not isinstance(self.config.num_classes, int) or isinstance(self.config.num_classes, bool) :
+            raise ValueError(f"The number of classes must be an integer. Current value is {self.config.num_classes} (type {type(self.config.num_classes)}).")
+
+        # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        # Labels creation
+
+        if self.config.num_classes >= 2 :
+            self.labels = np.random.randint(0, self.config.num_classes, size = self.__len__())
         else :
+            # Values smaller than 2 (e.g. the default -1) mean that labels are not used
             self.labels = None
 
     def get_feature(self, feature_name : str) -> np.ndarray :

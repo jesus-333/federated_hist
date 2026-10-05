@@ -32,7 +32,7 @@ modality = 'synthetic'
 seed = 42
 distribution = 'normal'
 size = -1        # replaced per client
-n_classes = -1
+num_classes = -1
 loc = 0
 scale = 1
 [data_size_based_on_dataset_type]   # debug only

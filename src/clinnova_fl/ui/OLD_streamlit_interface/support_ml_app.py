@@ -66,7 +66,7 @@ def set_model_params(ml_model_name : str, ml_model, params: NDArrays) :
     return ml_model
 
 
-def set_initial_params(ml_model_name : str, ml_model, n_classes : int, n_features : int) :
+def set_initial_params(ml_model_name : str, ml_model, num_classes : int, n_features : int) :
     """
     Set initial parameters as zeros.
     
@@ -78,15 +78,15 @@ def set_initial_params(ml_model_name : str, ml_model, n_classes : int, n_feature
     
     if ml_model_name == 'SVM' :
         # Setup the model classes
-        ml_model.classes_ = np.array([i for i in range(n_classes)])
+        ml_model.classes_ = np.array([i for i in range(num_classes)])
 
-        coef = np.zeros((n_classes, n_features))
-        intercept = np.zeros((n_classes,))
+        coef = np.zeros((num_classes, n_features))
+        intercept = np.zeros((num_classes,))
 
         initial_param = [coef, intercept]
 
-        x_fake = np.random.rand(n_classes, n_features)
-        y_fake = np.arange(n_classes)
+        x_fake = np.random.rand(num_classes, n_features)
+        y_fake = np.arange(num_classes)
         ml_model.fit(x_fake, y_fake)
     elif ml_model_name == 'k-means' :
         initial_param = get_kmeans_initial_parameters()

@@ -40,7 +40,7 @@ Each module has a `0_<module>_quickstart.md` (overview and index) plus one page 
 
 - `src/README.md`: package philosophy, Flower primer, app/dataset/data_connector design. Owned by the user: **do not modify** (only typos, grammar, formatting).
 - `README.md` (root): `run_config` mechanics and debugging tips for `flwr run`.
-- `pyproject.toml`: package `clinnova-fl` 1.0.0 (hatchling, `src/clinnova_fl`). Deps: `flwr[simulation]>=1.28`, `flwr-datasets[vision]`, `matplotlib`, `numpy>=2`, `pandas==2.2.3`, `scikit-learn`, `streamlit`, `toml`. No `requires-python` (but Python >= 3.12 is needed) and no `torch` (imported by `dataset`).
+- `pyproject.toml`: package `clinnova-fl` 1.0.0 (hatchling, `src/clinnova_fl`). Deps: `flwr[simulation]>=1.28`, `flwr-datasets[vision]`, `matplotlib`, `numpy>=2`, `pandas==2.2.3`, `scikit-learn`, `streamlit`, `toml`. No `requires-python` (but Python >= 3.12 is needed). `torch` is optional (lazy import in `dataset.tabular`; `dataset.images` still imports it eagerly).
 - `data/`: PRISM IBD metagenomics data (Franzosa et al., Nat. Microbiol. 2018; `41564_2018_306_MOESM4_ESM.xlsx`), `original_data.csv/.xlsx` (features as rows, samples as columns; includes `Age`, `Diagnosis` ∈ {Control, UC, CD}, medications, EC enzyme abundances), `backup.xlsx`.
 - Ignored artefacts: root `config/`, `shared_app/`, `old_code_backup/`.
 
@@ -49,11 +49,11 @@ Each module has a `0_<module>_quickstart.md` (overview and index) plus one page 
 | Component | Status |
 |-----------|--------|
 | Root server/client dispatch | Works for `flower_hist`. |
-| `flower_hist` | Logic complete. End-to-end runs are blocked by the data layer bugs below. |
+| `flower_hist` | Works end to end in debug simulation (`clinnova-hist --debug`, flwr 1.39, Python 3.12). Result TOML has numpy-repr strings. |
 | `flower_ml_tabular` | WIP, not runnable. |
-| `dataset.tabular` | `get_feature` path OK; labels path broken. |
+| `dataset.tabular` | `get_feature` path OK (torch optional); labels path broken. |
 | `dataset.images` | Stub. |
-| `data_connector.synthetic` | Broken (labels type check, getitem). |
+| `data_connector.synthetic` | Works. |
 | `data_connector.csv` + its config | Broken (dataclass field order, abstract `__len__`). |
 | `config.apps` | Skeleton, unused. |
 | `ui` | Only legacy code. |
@@ -63,16 +63,16 @@ Each module has a `0_<module>_quickstart.md` (overview and index) plus one page 
 
 Ordered roughly by impact. Details are in each linked page.
 
-1. `data_connector/synthetic.py`: inverted int check in `set_labels` and `.to_numpy()` on an ndarray. This breaks `clinnova-hist --debug`. [page](./modules/data_connector/synthetic.md)
-2. `config/connector/csv.py`: dataclass field order error, no `feature_to_predict`. [page](./modules/config/connector/csv.md)
-3. `data_connector/csv.py`: missing `__len__`, `set_labels` called before data is loaded, wrong numeric dtype check. [page](./modules/data_connector/csv.md)
-4. `dataset/tabular.py`: `self.labels` never set, connector labels not propagated. [page](./modules/dataset/tabular.md)
-5. `ml_models/svm.py`, `lda.py` subclass a function (`generic.get_ml_model`); `compute_metrics` misses `self`; LDA `labels_`/`scalings_`/`init_params` issues. [page](./modules/apps/flower_ml_tabular/ml_models/0_ml_models_quickstart.md)
-6. FedAvg messages carry no `custom_config`, so the root client cannot build the dataset for strategy-based apps. A nested `ml_model_config` is not valid in a `ConfigRecord`. [page](./modules/apps/flower_ml_tabular/server.md)
-7. `'fields_to_use_for_the_train in app_config'` string-literal check (ML client/server). [page](./modules/apps/flower_ml_tabular/client.md)
-8. ML `evaluate` takes 2 arguments but is called with 3. [page](./modules/apps/flower_ml_tabular/client.md)
-9. `flower_hist/server.py`: `node_ids_round` undefined when both predefined min/max are given; log bins with `min < 0 < max` are undefined. [page](./modules/apps/flower_hist/server.md)
-10. Non-simulation runs: the server always forwards `simulation`, so the deployment `full_node_config_path` branch in `apps/client.py` is unreachable through `flower_hist`. `run_with_nvflare` is never forwarded. [page](./modules/apps/client.md)
-11. `flower_k_means` listed but not implemented. `SUPPORTED_MODALITY` is missing a comma. `support_fl.check_custom_config` uses `isinstance` with generics. `images.py` raises `NotImplemented`.
-12. Packaging: `torch` missing from dependencies; Python >= 3.12 required (nested same-quote f-strings) but not declared.
-13. Leftover debug `pprint` calls in `apps/client.py` and `config/config.py`.
+1. `config/connector/csv.py`: dataclass field order error, no `feature_to_predict`. [page](./modules/config/connector/csv.md)
+2. `data_connector/csv.py`: missing `__len__`, `set_labels` called before data is loaded, wrong numeric dtype check. [page](./modules/data_connector/csv.md)
+3. `dataset/tabular.py`: `self.labels` never set, connector labels not propagated. [page](./modules/dataset/tabular.md)
+4. `ml_models/svm.py`, `lda.py` subclass a function (`generic.get_ml_model`); `compute_metrics` misses `self`; LDA `labels_`/`scalings_`/`init_params` issues. [page](./modules/apps/flower_ml_tabular/ml_models/0_ml_models_quickstart.md)
+5. FedAvg messages carry no `custom_config`, so the root client cannot build the dataset for strategy-based apps. A nested `ml_model_config` is not valid in a `ConfigRecord`. [page](./modules/apps/flower_ml_tabular/server.md)
+6. `'fields_to_use_for_the_train in app_config'` string-literal check (ML client/server). [page](./modules/apps/flower_ml_tabular/client.md)
+7. ML `evaluate` takes 2 arguments but is called with 3. [page](./modules/apps/flower_ml_tabular/client.md)
+8. `flower_hist/server.py`: `node_ids_round` undefined when both predefined min/max are given; log bins with `min < 0 < max` are undefined. [page](./modules/apps/flower_hist/server.md)
+9. Non-simulation runs: the server always forwards `simulation`, so the deployment `full_node_config_path` branch in `apps/client.py` is unreachable through `flower_hist`. `run_with_nvflare` is never forwarded. [page](./modules/apps/client.md)
+10. `flower_k_means` listed but not implemented. `SUPPORTED_MODALITY` is missing a comma. `support_fl.check_custom_config` uses `isinstance` with generics. `images.py` raises `NotImplemented`.
+11. Packaging: Python >= 3.12 required (nested same-quote f-strings) but not declared.
+12. Leftover debug `pprint` calls in `apps/client.py` and `config/config.py`.
+13. `flower_hist` result TOML stores numpy values as strings; `clinnova-hist` returns exit code 0 even when the simulation fails. [page](./modules/apps/flower_hist/server.md)
