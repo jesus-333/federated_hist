@@ -59,7 +59,7 @@ class data_connector(generic_data_connector):
 
         # Load the dataset
         # Note that from a security perspective, loading a csv file here and keep it as an attribute can be consider not ideal.
-        # Loading on the fly inside the __get_item__ method would be more secure, but it would also be less efficient.
+        # Loading on the fly inside the __getitem__ method would be more secure, but it would also be less efficient.
         # For now it is here because all of this is a prototype, but this kind of security issues should be discussed and addressed in the future.
         self.data = pd.read_csv(self.config.file_path, header = 0)
 
@@ -84,7 +84,7 @@ class data_connector(generic_data_connector):
 
         self.set_labels()
 
-    def __get_item__(self, idx) :
+    def __getitem__(self, idx) :
         """
         Return the row(s) specified by idx. The value of idx can be an integer index, a list of integer indices, a slice object (or any other type of index supported by pandas iloc).
         """

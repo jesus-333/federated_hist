@@ -68,7 +68,7 @@ class data_connector(generic_data_connector):
 
         self.set_labels()
 
-    def __get_item__(self, idx) :
+    def __getitem__(self, idx) :
         """
         Return the row(s) specified by idx. The value of idx can be an integer index, a list of integer indices, a slice object (or any other type of index supported by pandas iloc).
         """

@@ -51,7 +51,7 @@ class dataset(dataset):
             raise ValueError(f"Unsupported return type '{return_type}'. Supported return types are: {self.SUPPORTED_RETURN_TYPES}")
         self.return_type = return_type
     
-    def __get_item__(self, row_idx) :
+    def __getitem__(self, row_idx) :
         """
         Return the row(s) specified by row_idx. 
 

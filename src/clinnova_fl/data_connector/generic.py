@@ -66,7 +66,7 @@ class data_connector(ABC):
     # Abstract methods that must be implemented by all connectors
 
     @abstractmethod
-    def __get_item__(self, key) :
+    def __getitem__(self, key) :
         """
         Get the sample(s) specified by the key from the data source. The returned sample(s) and their format will depend on the specific implementation of the connector (e.g., a row from a CSV file, a record from a database, etc.).
         Note that the key can be a single identifier (e.g., an index, a primary key) or a more complex query depending on the data source and the connector implementation.
@@ -84,7 +84,7 @@ class data_connector(ABC):
 
         raise NotImplementedError("Subclasses must implement this method.")
 
-        # P.s. the __get_item__ method is a special method in Python that allows an object to use the square bracket notation (e.g., obj[key]) to retrieve items.
+        # P.s. the __getitem__ method is a special method in Python that allows an object to use the square bracket notation (e.g., obj[key]) to retrieve items.
         # By defining this method as abstract, we ensure that any subclass of data_connector must implement it, allowing for consistent access to data samples across different types of connectors.
 
     @abstractmethod
@@ -153,7 +153,7 @@ class data_connector(ABC):
     
     def get_sample(self, key) :
         """
-        Wrapper around the __get_item__ method if you prefer a more expicit/descriptive function name.
+        Wrapper around the __getitem__ method if you prefer a more expicit/descriptive function name.
 
         Returns
         -------
@@ -161,7 +161,7 @@ class data_connector(ABC):
             A single data sample retrieved from the data source. The format of the sample will depend on the specific implementation of the connector.
         """
 
-        return self.__get_item__(key)
+        return self.__getitem__(key)
 
     def compare_numerical_features(self, feature : str, comparison_type : str, filter_value, return_int_idx : bool = False) :
         """
@@ -230,15 +230,15 @@ class data_connector(ABC):
         
         # Get the keys of the samples that satisfy the specified filter condition
         try :
-            return self.__get_item__(filtered_keys)
+            return self.__getitem__(filtered_keys)
         except Exception as e :
             original_error = str(e)
         
-        # If there is an error during the retrieval of the samples using the __get_item__ method, raise an error with a clear message that includes the original error message and some additional context to help understand the issue.
+        # If there is an error during the retrieval of the samples using the __getitem__ method, raise an error with a clear message that includes the original error message and some additional context to help understand the issue.
         full_error_mesasge = f"Failed to retrieve the samples corresponding to the filtered keys: {filtered_keys}."
-        full_error_mesasge += f"\nThe get_filtered_keys method seems to be working correctly, as it returned the filtered keys without any issues. However, there is an issue with retrieving the samples using the __get_item__ method."
-        full_error_mesasge += f"\nNote that the output of the get_filtered_keys method is being passed directly as an argument to the __get_item__ method, and the error occurs during this step. The specific error message from the __get_item__ method is: {original_error}. "
-        full_error_mesasge += f"\nPlease check the implementation of the __get_item__/get_filtered_keys methods"
+        full_error_mesasge += f"\nThe get_filtered_keys method seems to be working correctly, as it returned the filtered keys without any issues. However, there is an issue with retrieving the samples using the __getitem__ method."
+        full_error_mesasge += f"\nNote that the output of the get_filtered_keys method is being passed directly as an argument to the __getitem__ method, and the error occurs during this step. The specific error message from the __getitem__ method is: {original_error}. "
+        full_error_mesasge += f"\nPlease check the implementation of the __getitem__/get_filtered_keys methods"
 
         raise ValueError(full_error_mesasge)
 

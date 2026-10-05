@@ -37,7 +37,7 @@ class dataset(ABC):
         Note that if specified, it must be possible to retrieve the labels of the samples in the dataset using the same key used to retrieve the samples themselves (i.e. if I access to a sample with `self.data_connector[key]`, I should be able to access to the label of that sample with `self.labels[key]`).
     """
 
-    # Note : Implementing the __get_item__ and __len__ methods allows to use the dataset with a torch DataLoader, which is a common pattern in PyTorch for loading data in batches.
+    # Note : Implementing the __getitem__ and __len__ methods allows to use the dataset with a torch DataLoader, which is a common pattern in PyTorch for loading data in batches.
 
     def __init__(self, dataset_id : str, data_connector : generic_data_connector.data_connector) :
         """
@@ -54,7 +54,7 @@ class dataset(ABC):
 
         self.labels = None
     
-    def __get_item__(self, key) :
+    def __getitem__(self, key) :
         """
         Return the sample specified by the key.
 
@@ -67,7 +67,7 @@ class dataset(ABC):
         if self.labels is None :
             return self.data_connector[key]
         else :
-            return self.data_connector[key], self.labaels[key]
+            return self.data_connector[key], self.labels[key]
 
     def __len__(self) -> int :
         """
