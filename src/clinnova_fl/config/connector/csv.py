@@ -19,7 +19,7 @@ from typing import Optional, Literal
 from pathlib import Path
 import toml
 
-from clinnova_fl.config.connector.generic import generic_connector_config
+from clinnova_fl.config.connector.generic import connector_config
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -35,7 +35,7 @@ SUPPORTED_FILTER_TYPES = {
 
 
 @dataclass
-class csv_connector_config(generic_connector_config):
+class csv_connector_config(connector_config):
     """
     Configuration for CSV data connector, used to extract data from CSV files, with optional filtering.
     

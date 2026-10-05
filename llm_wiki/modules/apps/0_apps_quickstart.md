@@ -58,10 +58,9 @@ The root client builds `dataset_istance` (note the spelling used everywhere in t
     - add a branch in `apps/server.py:return_server_module`;
     - add branches in `apps/client.py` for each of `query`, `train`, `evaluate` (raise `NotImplementedError` for unused ones).
 5. Optionally add a debug template in `config/debug_config/` and register it in `config/__init__.py:DEBUG_CONFIG_PATH`, then a console script in `pyproject.toml` + a function in `clinnova_fl/cli.py`.
-6. Use the **same app name string** in all of the above (currently the names are inconsistent for the ML app, see below).
+6. Use the **same app name string** in all of the above (e.g. `flower_hist`, `flower_ml_tabular`).
 
 ## Known issues (module level)
 
-- App name mismatch for the ML app: `LIST_OF_APPS` and `client.py` use `"flower_ml"`, `server.py:return_server_module` uses `"flower_ml_tabular"`, the debug template uses `app = "flower_ml_tabular"`. As a result the ML app cannot currently be dispatched on both sides.
 - `"flower_k_means"` is listed but no `apps/flower_k_means/` package exists. The client branches just `pass`, which leads to `UnboundLocalError`/`NameError` on the later call.
 - `return_server_module` has no `else` branch, so an unknown name raises `UnboundLocalError` (masked by the earlier `LIST_OF_APPS` check).

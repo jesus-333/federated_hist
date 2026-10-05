@@ -13,4 +13,4 @@ Console scripts are declared in `pyproject.toml` :
 clinnova-hist = "clinnova_fl.cli:flower_hist"
 ```
 
-Only `clinnova-hist` exists. There is no entry point for the ML tabular app yet (its `cli.py` exists but is not wired, see [`../apps/flower_ml_tabular/cli.md`](../apps/flower_ml_tabular/cli.md)).
+Only `clinnova-hist` exists. There is no entry point for the ML tabular app yet (its `cli.py` exists but is not wired to a console script, see [`../apps/flower_ml_tabular/cli.md`](../apps/flower_ml_tabular/cli.md)).

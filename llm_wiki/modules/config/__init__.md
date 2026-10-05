@@ -5,7 +5,7 @@ Defines `DEBUG_CONFIG_PATH`, a dict mapping names to debug template paths (absol
 | Key | Path | Exists |
 |-----|------|--------|
 | `flower_hist` | `debug_config/hist.toml` | yes |
-| `flower_ml` | `debug_config/ml.toml` | **no** (actual file: `ml_tabular.toml`) |
+| `flower_ml_tabular` | `debug_config/ml_tabular.toml` | yes |
 | `synthetic` | `debug_config/synthetic_data_connector.toml` | yes |
 
 Used by `config/config.py:get_debug_config_app` and `get_debug_config_data_connector`, called by `clinnova_fl.cli.write_debug_config`.

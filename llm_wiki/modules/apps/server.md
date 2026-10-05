@@ -45,5 +45,4 @@ Branches: `flower_hist`, `flower_ml_tabular`, `flower_k_means`.
 
 ## Known issues
 
-- App name inconsistency with `LIST_OF_APPS` (`flower_ml` vs `flower_ml_tabular`), see [`0_apps_quickstart.md`](./0_apps_quickstart.md#known-issues-module-level).
 - `main` has an empty docstring.

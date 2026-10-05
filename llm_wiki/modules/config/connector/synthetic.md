@@ -20,4 +20,4 @@ No validation in `__post_init__` (e.g. distribution, `n_classes`).
 ## Consumer
 
 `data_connector/synthetic.py` (see [`../../data_connector/synthetic.md`](../../data_connector/synthetic.md)).
-The connector reads `config.num_classes`, which does **not** exist here (the field is `n_classes`).
+The connector reads `config.n_classes`.

@@ -12,7 +12,7 @@
 ## `get_connector(connector_config) -> data_connector`
 
 Dispatches on `connector_config.modality`: `'csv'` → `data_connector.csv.data_connector`, `'synthetic'` → `data_connector.synthetic.data_connector`.
-The error message references `generic.SUPPORTED_COMPARISON_TYPE` on the config module, which does not exist (`AttributeError` when the error path is hit). It should be `SUPPORTED_MODALITY`.
+The error message lists `config.connector.generic.SUPPORTED_MODALITY` (which currently reads `['csvsynthetic']` because of a missing comma).
 
 ## Notes
 

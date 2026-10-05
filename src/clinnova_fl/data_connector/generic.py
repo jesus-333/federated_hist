@@ -34,7 +34,7 @@ class data_connector(ABC):
     ----------
     modality : str
         The type of data source this connector handles (e.g., 'csv', 'json', 'database').
-    config : generic_connector_config
+    config : generic.connector_config
         The configuration object for this connector.
 
     Methods
@@ -53,7 +53,7 @@ class data_connector(ABC):
         
         Parameters
         ----------
-        config : generic_connector_config
+        config : generic.connector_config
             The configuration object for this connector.
         """
 
@@ -250,7 +250,7 @@ def get_connector(connector_config : generic.connector_config) -> data_connector
 
     Parameters
     ----------
-    connector_config : generic_connector_config
+    connector_config : generic.connector_config
         The configuration object for the data connector, which includes the modality and any specific parameters needed to initialize the connector.
     """
 
@@ -261,7 +261,7 @@ def get_connector(connector_config : generic.connector_config) -> data_connector
     elif modality == 'synthetic' :
         from clinnova_fl.data_connector.synthetic import data_connector
     else :
-        raise ValueError(f'Modality {modality} not supported. Currently supported modalities are: {generic.SUPPORTED_COMPARISON_TYPE}')
+        raise ValueError(f'Modality {modality} not supported. Currently supported modalities are: {generic.SUPPORTED_MODALITY}')
 
     return data_connector(connector_config)
 

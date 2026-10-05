@@ -5,7 +5,7 @@ Defines the registry of app names :
 LIST_OF_APPS = [
     "flower_hist",
     "flower_k_means",
-    "flower_ml",
+    "flower_ml_tabular",
 ]
 ```
 
@@ -18,4 +18,3 @@ When adding a new app, append its name here (it must equal the folder name and t
 ## Known issues
 
 - `"flower_k_means"` has no implementation.
-- `"flower_ml"` does not match the folder `flower_ml_tabular` nor the name used in `server.py:return_server_module`.

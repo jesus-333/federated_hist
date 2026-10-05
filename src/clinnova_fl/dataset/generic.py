@@ -41,12 +41,14 @@ class dataset(ABC):
 
     def __init__(self, dataset_id : str, data_connector : generic_data_connector.data_connector) :
         """
-        Initialize the generic data connector with a configuration.
-        
+        Initialize the generic dataset with its id and data connector.
+
         Parameters
         ----------
-        config : generic_connector_config
-            The configuration object for this connector.
+        dataset_id : str
+            The unique identifier of the dataset.
+        data_connector : generic_data_connector.data_connector
+            The data connector used to retrieve the data for this dataset.
         """
 
         self.dataset_id = dataset_id

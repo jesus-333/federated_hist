@@ -41,7 +41,7 @@ def evaluate(msg : Message, context : Context) :
     # Get the evaluation function for the specified app
     if context.run_config["app"] == "flower_hist" :
         raise NotImplementedError("The 'flower_hist' app does not have an 'evaluate' function.")
-    elif context.run_config["app"] == "flower_ml" :
+    elif context.run_config["app"] == "flower_ml_tabular" :
         from clinnova_fl.apps.flower_ml_tabular.client import evaluate
     elif context.run_config["app"] == "flower_k_means" :
         pass
@@ -65,8 +65,8 @@ def query(msg : Message, context : Context) :
     # Get the query function for the specified app
     if context.run_config["app"] == "flower_hist" :
         from clinnova_fl.apps.flower_hist.client import query
-    elif context.run_config["app"] == "flower_ml" :
-        raise NotImplementedError("The 'flower_ml' app does not have a 'query' function. Use the 'train' function instead.")
+    elif context.run_config["app"] == "flower_ml_tabular" :
+        raise NotImplementedError("The 'flower_ml_tabular' app does not have a 'query' function. Use the 'train' function instead.")
     elif context.run_config["app"] == "flower_k_means" :
         pass
     else :
@@ -89,7 +89,7 @@ def train(msg : Message, context : Context) :
     # Get the training function for the speciefied app
     if context.run_config["app"] == "flower_hist" :
         raise NotImplementedError("The 'flower_hist' app does not have a 'train' function.")
-    elif context.run_config["app"] == "flower_ml" :
+    elif context.run_config["app"] == "flower_ml_tabular" :
         from clinnova_fl.apps.flower_ml_tabular.client import train
     elif context.run_config["app"] == "flower_k_means" :
         pass

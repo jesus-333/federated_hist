@@ -12,6 +12,6 @@ Alberto Zancanaro <alberto.zancanaro@uni.lu>
 LIST_OF_APPS = [
     "flower_hist",
     "flower_k_means",
-    "flower_ml",
+    "flower_ml_tabular",
 ]
 

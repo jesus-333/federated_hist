@@ -32,10 +32,10 @@ def main_ml_tabular(args, flwr_args) -> None:
     num_supernodes = 7
 
     if args.debug :
-        path_app_config = write_debug_config(num_supernodes, "flower_hist",)
+        path_app_config = write_debug_config(num_supernodes, "flower_ml_tabular",)
         print(f"Debug mode enabled. A copy of the config used is saved at : {path_app_config}")
     elif args.config_file is None :
-        path_app_config = "./config/hist.toml"
+        path_app_config = "./config/ml_tabular.toml"
         print(f"No configuration file provided. Using the default one: {path_app_config}")
     else :
         path_app_config = args.config_file
@@ -53,11 +53,11 @@ def main_ml_tabular(args, flwr_args) -> None:
     
     config = toml.load(path_app_config)
 
-    if 'app' not in config or config['app'] != 'flower_hist' :
-        print(f"Error: The provided configuration file does not contain a valid 'app = \"flower_hist\"' entry: {path_app_config}")
+    if 'app' not in config or config['app'] != 'flower_ml_tabular' :
+        print(f"Error: The provided configuration file does not contain a valid 'app = \"flower_ml_tabular\"' entry: {path_app_config}")
         sys.exit(1)
-    # if 'flower_hist_config' not in config :
-    #     print(f"Error: The provided configuration file does not contain the 'flower_hist_config' section: {path_app_config}")
+    # if 'flower_ml_tabular_config' not in config :
+    #     print(f"Error: The provided configuration file does not contain the 'flower_ml_tabular_config' section: {path_app_config}")
     #     sys.exit(1)
 
     # ***************************************
@@ -71,7 +71,7 @@ def main_ml_tabular(args, flwr_args) -> None:
         # In case of debug add also the number of supernodes
         if args.debug : command += ["--federation-config", f"num-supernodes={num_supernodes}"]
 
-    command += ["--run-config", f"app='flower_hist' path_app_config='{path_app_config}'"]
+    command += ["--run-config", f"app='flower_ml_tabular' path_app_config='{path_app_config}'"]
     # command += ["--run-config", f"{path_app_config}"]
     command += flwr_args
     

@@ -22,7 +22,7 @@ Dispatch table :
 | `run_config["app"]` | `query` | `train` | `evaluate` |
 |---|---|---|---|
 | `flower_hist` | `apps.flower_hist.client.query` | `NotImplementedError` | `NotImplementedError` |
-| `flower_ml` | `NotImplementedError` | `apps.flower_ml_tabular.client.train` | `apps.flower_ml_tabular.client.evaluate` |
+| `flower_ml_tabular` | `NotImplementedError` | `apps.flower_ml_tabular.client.train` | `apps.flower_ml_tabular.client.evaluate` |
 | `flower_k_means` | `pass` (broken) | `pass` (broken) | `pass` (broken) |
 | other | `ValueError` | `ValueError` | `ValueError` |
 
@@ -61,6 +61,5 @@ This currently blocks the ML tabular app (see [`flower_ml_tabular/0_flower_ml_ta
 ## Known issues
 
 - `flower_k_means` branches.
-- `"flower_ml"` app name inconsistent with server.
 - Debug prints left in `get_simulated_node_config`.
 - Line 167 nests double quotes inside an f-string (Python >= 3.12 required).

@@ -39,4 +39,4 @@ This works because the server forwards the full `app_config` (including `paths_n
 
 - Unused imports: `random`, `DEBUG_CONFIG_PATH`.
 - The extra `syth_2` entry leaks the extra dataset into the node config. It is harmless but its key has a typo.
-- `n_classes` stays `-1` in the generated synthetic configs, and the generated features are named `feature_1 ... feature_n` while the hist debug template asks for `bins_variable = "feature_0"`. Together with the bugs in the synthetic connector, `clinnova-hist --debug` currently fails on the client side (see [`../data_connector/synthetic.md`](../data_connector/synthetic.md)).
+- `n_classes` stays `-1` in the generated synthetic configs. With the remaining bugs in the synthetic connector (inverted type check), `clinnova-hist --debug` currently fails on the client side (see [`../data_connector/synthetic.md`](../data_connector/synthetic.md)).

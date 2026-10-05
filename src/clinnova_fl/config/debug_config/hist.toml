@@ -5,7 +5,7 @@ max_number_of_attempts = 10
 
 # App specific config
 n_bins = 10
-bins_variable = "feature_0"
+bins_variable = "feature_1"
 bins_distribution = "uniform"
 path_to_save = "./results/"
 create_plot = false

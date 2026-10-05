@@ -10,7 +10,7 @@ It is the reference example of an app that relies on a Flower strategy and on `@
 | File | Purpose | Page |
 |------|---------|------|
 | `__init__.py` | Docstring only. | — |
-| `cli.py` | `main_ml_tabular(args, flwr_args)`: copy of the hist CLI, not adapted, not wired. | [`cli.md`](./cli.md) |
+| `cli.py` | `main_ml_tabular(args, flwr_args)`: builds and runs the `flwr run` command (not wired to a console script). | [`cli.md`](./cli.md) |
 | `client.py` | `train(msg, context, dataset_istance)`, placeholder `evaluate`. | [`client.md`](./client.md) |
 | `server.py` | `main(grid, context, experiment_config)`: FedAvg loop and saving of the final params. | [`server.md`](./server.md) |
 | `support_ml_app.py` | Legacy procedural helpers (pre-`ml_models`). Not imported by the app. | [`support_ml_app.md`](./support_ml_app.md) |
@@ -28,11 +28,11 @@ server: result.arrays -> {path_to_save}/final_params_{ml_model_name}.pkl
 
 ## App config
 
-Debug template: `config/debug_config/ml_tabular.toml`.
+Debug template: `config/debug_config/ml_tabular.toml` (registered as `DEBUG_CONFIG_PATH['flower_ml_tabular']`).
 
 | Key | Notes |
 |-----|-------|
-| `app` | `"flower_ml_tabular"` in the template. It must match the dispatch names (currently inconsistent). |
+| `app` | `"flower_ml_tabular"`. |
 | `dataset_id` | Dataset in `node_config`. |
 | `ml_model_name` | `"svm"` or `"lda"` (lower case, see `ml_models/generic.py:IMPLEMENTED_MODELS`). |
 | `num_rounds` | FedAvg rounds. |
@@ -47,10 +47,9 @@ Models without warm start (LDA, LinearSVC) gain nothing from more than one feder
 
 ## Known issues (blocking)
 
-1. **App name** mismatch: `"flower_ml"` (client/`LIST_OF_APPS`) vs `"flower_ml_tabular"` (server dispatch, template).
-2. **`ml_models/svm.py` and `lda.py` inherit from `generic.get_ml_model`** (a function) instead of `generic.generic_ml_model`, so importing them raises `TypeError`.
-3. **Dataset on the client**: the root client builds the dataset from `custom_config`, which FedAvg does not send. The run config arrives under `msg.content["config"]`, so `get_dataset` fails with `KeyError: 'dataset_id'`.
-4. **Nested config**: `ConfigRecord(config_dict = app_config)` with the `[ml_model_config]` table (a nested dict) is not a supported `ConfigRecord` value.
-5. `'fields_to_use_for_the_train in app_config'` is a string literal (always truthy) in both `client.py` and `server.py`. The intended check is `'fields_to_use_for_the_train' in app_config`. With the template's empty list, `n_features = 0`.
-6. `tabular.dataset` never sets `self.labels`, so `dataset_istance.labels` raises `AttributeError` (see [`../../dataset/tabular.md`](../../dataset/tabular.md)).
-7. `generic_ml_model.compute_metrics` lacks `self`.
+1. **`ml_models/svm.py` and `lda.py` inherit from `generic.get_ml_model`** (a function) instead of `generic.generic_ml_model`, so importing them raises `TypeError`.
+2. **Dataset on the client**: the root client builds the dataset from `custom_config`, which FedAvg does not send. The run config arrives under `msg.content["config"]`, so `get_dataset` fails with `KeyError: 'dataset_id'`.
+3. **Nested config**: `ConfigRecord(config_dict = app_config)` with the `[ml_model_config]` table (a nested dict) is not a supported `ConfigRecord` value.
+4. `'fields_to_use_for_the_train in app_config'` is a string literal (always truthy) in both `client.py` and `server.py`. The intended check is `'fields_to_use_for_the_train' in app_config`. With the template's empty list, `n_features = 0`.
+5. `tabular.dataset` never sets `self.labels`, so `dataset_istance.labels` raises `AttributeError` (see [`../../dataset/tabular.md`](../../dataset/tabular.md)).
+6. `generic_ml_model.compute_metrics` lacks `self`.

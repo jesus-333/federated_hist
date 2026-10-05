@@ -84,17 +84,17 @@ class data_connector(generic_data_connector):
 
     def set_labels(self) :
         """
-        If in the config the key 'num_classes' is specified, and has a value equals or greater than 2, then create random labels for the samples. The labels are integers from 0 to num_classes - 1, assigned randomly to the samples.
+        If in the config the key 'n_classes' is specified, and has a value equals or greater than 2, then create random labels for the samples. The labels are integers from 0 to n_classes - 1, assigned randomly to the samples.
         Otherwise, the labels are set to None.
         """
 
-        if self.config.num_classes is not None :
-            # Chcek that num_classes is an integer
-            if type(self.config.num_classes) is int : raise ValueError("The number of classes must be an integer.")
+        if self.config.n_classes is not None :
+            # Chcek that n_classes is an integer
+            if type(self.config.n_classes) is int : raise ValueError("The number of classes must be an integer.")
             
-            # Check value of num_classes
-            if self.config.num_classes >= 2 :
-                self.labels = np.random.randint(0, self.config.num_classes, size = self.__len__())
+            # Check value of n_classes
+            if self.config.n_classes >= 2 :
+                self.labels = np.random.randint(0, self.config.n_classes, size = self.__len__())
             else :
                 raise ValueError("The number of classes must be greater than or equal to 2.")
         else :
